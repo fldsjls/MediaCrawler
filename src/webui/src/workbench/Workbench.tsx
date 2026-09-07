@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { LayoutDashboard, ListTodo, Database, Settings, Info, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react'
+import { LayoutDashboard, ListTodo, Settings, Info, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react'
 import { api, BrowserSettings, Config, Event, Platform, Resource, Results, saved, Session, states, Task, wsUrl } from './api'
 import { ConfigurationPanel } from './ConfigurationPanel'
 import { PlatformType } from './PlatformManager'
@@ -14,8 +14,8 @@ import './workbench.css'
 
 const initial: Config = { platform: 'bili', mode: 'detail', target: '', max_items: 5, max_downloads: 5, max_comments: 20, comments: true, subcomments: false, download_video: false, download_images: false, operation: 'collect', output: 'jsonl', login: 'qrcode', cookies: '', start: 1, wait_ms: 5000, selector: '' }
 const empty: Results = { records: [], files: [], exports: [] }
-const navigation = ['工作台', '任务中心', '采集结果', '设置', '关于']
-const navIcons = [LayoutDashboard, ListTodo, Database, Settings, Info]
+const navigation = ['工作台', '任务中心', '设置', '关于']
+const navIcons = [LayoutDashboard, ListTodo, Settings, Info]
 
 export function Workbench({ onConnectionChange }: { onConnectionChange?: (state: 'connecting' | 'connected' | 'disconnected') => void }) {
   const [section, setSection] = useState('工作台')
@@ -188,15 +188,14 @@ export function Workbench({ onConnectionChange }: { onConnectionChange?: (state:
   return <div className={`wb-shell ${navCollapsed ? 'nav-collapsed' : ''}`}>
     <button ref={menuButton} className="wb-menu" aria-expanded={drawer} aria-controls="workspace-navigation" onClick={() => setDrawer(!drawer)}><Menu size={18} />{section}</button>
     {drawer && <button className="wb-drawer-backdrop" aria-label="关闭导航" onClick={() => setDrawer(false)} />}
-    <nav ref={nav} id="workspace-navigation" className={`wb-nav ${drawer ? 'open' : ''}`} aria-label="主导航"><div className="wb-nav-heading"><span>工作空间</span><button className="wb-nav-collapse" aria-label={navCollapsed ? '展开导航' : '折叠导航'} aria-expanded={!navCollapsed} onClick={() => setNavCollapsed(!navCollapsed)}>{navCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}</button><button className="wb-nav-close" aria-label="关闭导航" onClick={() => setDrawer(false)}><X size={18} /></button></div>{navigation.map((title, i) => { const Icon = navIcons[i];return <button key={title} title={title} aria-label={title} aria-current={section === title ? 'page' : undefined} onClick={() => { setSection(title); setDrawer(false); if (title === '任务中心' && !task && tasks[0]) selectTask(tasks[0]) }}><Icon size={18} strokeWidth={1.7} /><span>{title}</span></button> })}<small>本机工作区</small></nav>
+    <nav ref={nav} id="workspace-navigation" className={`wb-nav ${drawer ? 'open' : ''}`} aria-label="主导航"><div className="wb-nav-heading"><span>工作空间</span><button className="wb-nav-collapse" aria-label={navCollapsed ? '展开导航' : '折叠导航'} aria-expanded={!navCollapsed} onClick={() => setNavCollapsed(!navCollapsed)}>{navCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}</button><button className="wb-nav-close" aria-label="关闭导航" onClick={() => setDrawer(false)}><X size={18} /></button></div>{navigation.map((title, i) => { const Icon = navIcons[i];return <button key={title} title={title} aria-label={title} aria-current={section === title ? 'page' : undefined} onClick={() => { setSection(title); setDrawer(false) }}><Icon size={18} strokeWidth={1.7} /><span>{title}</span></button> })}<small>本机工作区</small></nav>
     <main className="wb-main">
       {offline && <div className="wb-offline" role="status">与服务的连接已中断，正在重连。任务状态以重新连接后的记录为准。</div>}
       <div className="wb-workbench" style={{ display: section === '工作台' ? 'grid' : 'none' }}>
         <ConfigurationPanel config={config} setConfig={setConfig} platforms={platforms.filter(p => (p.enabled !== false || p.id === config.platform) && (category === 'all' || p.category === category || p.id === config.platform))} platform={platform} task={configTask} busy={busy} onPlatform={() => setPreviewId(undefined)} onOpen={() => openWebsite()} onStart={start} onControl={action => { if (configTask) control(action, configTask.id) }} onError={setError} category={category} types={platformTypes} onCategory={setCategory} />
         <Workspace refreshKey={layoutRevision} onReset={() => { setNavCollapsed(false) }} onVisibility={setBrowserVisible} browser={<BrowserPanel recentTasks={tasks.slice(0, 3)} onOpenTask={openTask} session={currentSession} navigationRequest={navigationRequest} visible={browserVisible && section === '工作台'} target={config.target || platform?.url || ''} onOpen={() => openWebsite()} onSession={updateSession} onError={setError} />} logs={logs} results={resultPanel} />
       </div>
-      {section === '任务中心' && <TaskCenter tasks={tasks} platforms={platforms} selected={task} busy={busy} logs={logs} onSelect={selectTask} onOpen={openTask} onNew={() => setSection('工作台')} onRefresh={() => void perform(refresh)} onControl={control} />}
-      {section === '采集结果' && <section className="wb-page wb-all-results"><div className="wb-page-heading"><h1>采集结果</h1><label className="wb-task-picker"><span className="sr-only">选择任务</span><select aria-label="选择结果任务" value={taskId || ''} onChange={e => { const next = tasks.find(t => t.id === e.target.value); if (next) selectTask(next); else setTaskId(undefined) }}><option value="">请选择任务</option>{tasks.map(t => <option key={t.id} value={t.id}>{platforms.find(p => p.id === t.config.platform)?.name || t.config.platform} · {t.config.target} · {states[t.state]}</option>)}</select></label></div>{resultPanel}</section>}
+      {section === '任务中心' && <TaskCenter tasks={tasks} platforms={platforms} sessions={sessions} busy={busy} onOpen={openTask} onNew={() => setSection('工作台')} onRefresh={() => void perform(refresh)} onControl={control} onError={(message, opener) => { errorReturnFocus.current = opener || document.activeElement as HTMLElement; setError(message) }} />}
       {section === '设置' && <SettingsCenter sessions={sessions} platform={config.platform} channel={channel} busy={busy} navCollapsed={navCollapsed} onChannel={setChannel} onNavCollapsed={setNavCollapsed} onLayout={() => setLayoutRevision(value => value + 1)} onPlatforms={loadPlatforms} onError={setError} onExternal={() => openWebsite(true)} onCloseSession={id => void perform(async () => { await api(`/browser-sessions/${id}`, undefined, 'DELETE'); if (previewId === id) setPreviewId(undefined) })} />}
       {section === '关于' && <section className="wb-page wb-about"><span className="wb-eyebrow">MediaCrawler</span><h1>统一工作台</h1><p>通用网站工作台。通过网站适配器与功能模板扩展采集能力，公共服务统一管理浏览器、任务、下载和结果。</p><h2>预览与人工操作</h2><p>预览来自任务使用的 Chromium，接管确认后才允许输入。隐藏预览只停止画面传输。打开网站只发现资源；开始任务或手动选择资源后才下载。书籍正文与购物价格采集尚未接入。</p><h2>许可与来源</h2><p>保留 MediaCrawler 的非商业学习许可证。课程模块来自本地 playwright_crawler；来源版本与下载工具说明见项目中的 src/browser-worker/PROVENANCE.md。</p><a href="https://github.com/NanmiCoder/MediaCrawler" target="_blank" rel="noreferrer">MediaCrawler 上游项目</a><AuthorFooter /></section>}
     </main>
