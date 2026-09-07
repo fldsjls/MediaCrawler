@@ -8,18 +8,18 @@ from pathlib import Path
 
 import pytest
 
-from api.workbench.browser import BrowserSession, kill_tree
-from api.workbench.models import SessionConfig, TaskConfig
+from mediacrawler.workbench.browser import BrowserSession, kill_tree
+from mediacrawler.workbench.models import SessionConfig, TaskConfig
 
 
 FIXTURE = r'''
 import asyncio, importlib, json, os, types, faulthandler
 faulthandler.dump_traceback_later(20, repeat=True)
-from base.base_crawler import AbstractCrawler, AbstractApiClient
+from mediacrawler.common.base.base_crawler import AbstractCrawler, AbstractApiClient
 from playwright.async_api import async_playwright
 
 class FixtureClient(AbstractApiClient):
-    __module__ = 'media_platform.bilibili.client'
+    __module__ = 'mediacrawler.platforms.bilibili.client'
     headers = {'Referer': 'http://127.0.0.1/', 'Cookie': 'do-not-export'}
     async def request(self, *args, **kwargs): return {}
     async def update_cookies(self, browser_context, urls=None): pass
@@ -34,7 +34,7 @@ class FixtureClient(AbstractApiClient):
         return {'list': {'vlist': [{'bvid': str(aid)} for aid in range(5)]}, 'page': {'count': 1000}}
 
 class FixtureLogin:
-    __module__ = 'media_platform.bilibili.login'
+    __module__ = 'mediacrawler.platforms.bilibili.login'
     def __init__(self, page): self.page = page
     async def check_login_state(self, previous_session):
         assert previous_session == 'before-login'
@@ -45,9 +45,9 @@ class FixtureCrawler(AbstractCrawler):
     async def search(self): pass
     async def launch_browser(self, *args, **kwargs): raise AssertionError('Browser must be reused')
     async def start(self):
-        from tools.async_file_writer import AsyncFileWriter
-        from store.bilibili import update_bilibili_video
-        import config
+        from mediacrawler.infrastructure.helpers.async_file_writer import AsyncFileWriter
+        from mediacrawler.storage.stores.bilibili import update_bilibili_video
+        import mediacrawler.config as config
         assert len(config.BILI_SPECIFIED_ID_LIST) == 2, 'detail inputs must obey the content limit'
         async with async_playwright() as playwright:
             self.browser_context = await self.launch_browser(playwright.chromium)
@@ -81,9 +81,9 @@ class FixtureCrawler(AbstractCrawler):
 original_import = importlib.import_module
 def imports(name, *args, **kwargs):
     fixtures = {
-      'media_platform.bilibili.core': types.SimpleNamespace(FixtureCrawler=FixtureCrawler),
-      'media_platform.bilibili.client': types.SimpleNamespace(FixtureClient=FixtureClient),
-      'media_platform.bilibili.login': types.SimpleNamespace(FixtureLogin=FixtureLogin),
+      'mediacrawler.platforms.bilibili.core': types.SimpleNamespace(FixtureCrawler=FixtureCrawler),
+      'mediacrawler.platforms.bilibili.client': types.SimpleNamespace(FixtureClient=FixtureClient),
+      'mediacrawler.platforms.bilibili.login': types.SimpleNamespace(FixtureLogin=FixtureLogin),
     }
     if name in fixtures:
         module = types.ModuleType(name)
@@ -91,7 +91,7 @@ def imports(name, *args, **kwargs):
         return module
     return original_import(name, *args, **kwargs)
 importlib.import_module = imports
-from api.workbench import platform_worker
+from mediacrawler.workbench import platform_worker
 class CapturedRuntime(platform_worker.Runtime):
     def __init__(self):
         super().__init__()
@@ -117,7 +117,7 @@ async def test_worker_reuses_browser_waits_login_and_preserves_normalized_result
         await session.start()
         config = TaskConfig(platform='bili', target='BV-fixture1,BV-fixture2,BV-ignored',
                             max_items=2, max_comments=1, media=True)
-        env = {**os.environ, 'PYTHONPATH': str(root), 'PYTHONIOENCODING': 'utf-8',
+        env = {**os.environ, 'PYTHONPATH': str(root / 'src'), 'PYTHONIOENCODING': 'utf-8',
                'MC_TASK_CONFIG': config.model_dump_json(), 'MC_TASK_DIR': str(task_directory),
                'MC_BROWSER_ENDPOINT': session.endpoint, 'MC_EXISTING_RECORDS': '["content:101"]'}
         process = subprocess.Popen([sys.executable, '-u', str(script)], cwd=root, env=env,

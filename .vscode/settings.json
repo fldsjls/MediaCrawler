@@ -1,0 +1,20 @@
+{
+  "files.exclude": {
+    "**/.git": false,
+    "**/__pycache__": false,
+    "**/node_modules": false,
+    "**/*.egg-info": false,
+    ".venv": false,
+    ".pytest_cache": false,
+    ".build": false,
+    ".local": false
+  },
+  "explorer.excludeGitIgnore": false,
+  "search.exclude": {
+    ".local": true,
+    ".build": true,
+    "**/node_modules": true
+  },
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": ["${workspaceFolder}/src"]
+}

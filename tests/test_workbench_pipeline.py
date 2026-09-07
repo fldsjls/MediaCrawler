@@ -2,6 +2,7 @@
 
 All traffic uses a local HTTP fixture; this does not certify any real platform login.
 """
+from mediacrawler.paths import TOOLS_ROOT
 import asyncio
 import contextlib
 import http.server
@@ -13,13 +14,13 @@ from pathlib import Path
 
 import pytest
 
-from api.workbench.models import TaskConfig, TERMINAL
-from api.workbench.service import Workbench, WORKER, resource_identity
+from mediacrawler.workbench.models import TaskConfig, TERMINAL
+from mediacrawler.workbench.service import Workbench, WORKER, resource_identity
 
 
 @contextlib.contextmanager
 def fixture_site(root):
-    subprocess.run([str(WORKER / 'tools/ffmpeg/ffmpeg.exe'), '-v', 'error', '-y', '-f', 'lavfi',
+    subprocess.run([str(TOOLS_ROOT / 'ffmpeg/ffmpeg.exe'), '-v', 'error', '-y', '-f', 'lavfi',
         '-i', 'color=c=blue:s=160x90:d=0.5', '-c:v', 'libx264', '-f', 'hls', '-hls_time', '1',
         '-hls_segment_filename', str(root / 'segment%03d.ts'), str(root / 'play.m3u8')], check=True, capture_output=True)
     requests = []
@@ -67,8 +68,8 @@ async def until(workbench, task_id, states=TERMINAL, timeout=75):
 
 @pytest.mark.asyncio
 async def test_custom_video_template_uses_owned_preview_and_shared_queue(tmp_path):
-    from api.workbench.platforms.registry import PlatformDefinition
-    from api.workbench.models import SessionConfig
+    from mediacrawler.workbench.platforms.registry import PlatformDefinition
+    from mediacrawler.workbench.models import SessionConfig
     media = tmp_path / 'media'
     media.mkdir()
     workbench = Workbench(tmp_path / 'workbench')

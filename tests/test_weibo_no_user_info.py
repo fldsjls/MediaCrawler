@@ -109,7 +109,7 @@ class _FakeStore:
 def _patch_factory(fake: "_FakeStore"):
     """把 store.weibo.WeibostoreFactory.create_store 替换为返回 fake 的静态方法,
     返回 (module, orig) 便于 finally 还原。"""
-    import store.weibo as wb
+    import mediacrawler.storage.stores.weibo as wb
     orig = wb.WeibostoreFactory.create_store
     wb.WeibostoreFactory.create_store = staticmethod(lambda: fake)
     return wb, orig
@@ -123,7 +123,7 @@ def _restore(wb, orig):
 
 def test_weibo_note_masks_user_info():
     """note 拍平后的存储 dict 不含禁用键、creator_hash 不等于原始 user id、昵称已脱敏。"""
-    import store.weibo as wb
+    import mediacrawler.storage.stores.weibo as wb
 
     fake = _FakeStore()
     wb_, orig = _patch_factory(fake)
@@ -163,7 +163,7 @@ def test_weibo_note_masks_user_info():
 
 def test_weibo_comment_masks_user_info():
     """comment 拍平后的存储 dict 不含禁用键、creator_hash 不等于原始 user id、昵称已脱敏。"""
-    import store.weibo as wb
+    import mediacrawler.storage.stores.weibo as wb
 
     fake = _FakeStore()
     wb_, orig = _patch_factory(fake)
@@ -210,8 +210,8 @@ def test_weibo_store_end_to_end_sqlite():
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
-    import store.weibo as wb
-    from database.models import Base, WeiboNote, WeiboNoteComment
+    import mediacrawler.storage.stores.weibo as wb
+    from mediacrawler.storage.database.models import Base, WeiboNote, WeiboNoteComment
 
     # ---- 1. 用 FakeStore 捕获 update_weibo_note / update_weibo_note_comment 产生的真实 dict ----
     fake = _FakeStore()

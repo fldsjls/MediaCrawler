@@ -18,9 +18,9 @@ import types
 
 import pytest
 
-import store.kuaishou as ks
-from store.kuaishou import update_kuaishou_video, update_ks_video_comment
-from tools.user_hash import anonymize_user_id, mask_nickname
+import mediacrawler.storage.stores.kuaishou as ks
+from mediacrawler.storage.stores.kuaishou import update_kuaishou_video, update_ks_video_comment
+from mediacrawler.infrastructure.helpers.user_hash import anonymize_user_id, mask_nickname
 
 # 教学版禁用字段(键)：一律不得出现在存储 dict 中。
 # 昵称字段 nickname 允许保留，但值须脱敏。
@@ -221,7 +221,7 @@ def test_kuaishou_store_end_to_end_sqlite():
     from sqlalchemy.orm import sessionmaker
     from sqlalchemy.pool import StaticPool
 
-    from database.models import Base, KuaishouVideo, KuaishouVideoComment
+    from mediacrawler.storage.database.models import Base, KuaishouVideo, KuaishouVideoComment
 
     async def run():
         # 内存 SQLite + StaticPool：单连接共享，保证 create_all 与后续读写同一库

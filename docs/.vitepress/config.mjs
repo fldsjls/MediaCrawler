@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress';
 import { withMermaid } from 'vitepress-plugin-mermaid';
+import { fileURLToPath } from 'node:url';
 import { nav, sidebar } from './site-map.mjs';
 
 export default withMermaid(defineConfig({
@@ -8,6 +9,8 @@ export default withMermaid(defineConfig({
   description: '通用网站采集工作台：操作、架构、开发与验收。',
   base: process.env.DOCS_BASE || '/MediaCrawler/',
   appearance: true,
+  outDir: fileURLToPath(new URL('../../.build/docs', import.meta.url)),
+  cacheDir: fileURLToPath(new URL('../../.local/cache/docs', import.meta.url)),
   lastUpdated: true,
   cleanUrls: false,
   themeConfig: {

@@ -34,11 +34,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.pool import StaticPool
 
-import config
-import store.douyin as ds
-from database import db_session
-from database.models import Base, DouyinAweme, DouyinAwemeComment
-from tools.user_hash import anonymize_user_id, mask_nickname
+import mediacrawler.config as config
+import mediacrawler.storage.stores.douyin as ds
+from mediacrawler.storage.database import db_session
+from mediacrawler.storage.database.models import Base, DouyinAweme, DouyinAwemeComment
+from mediacrawler.infrastructure.helpers.user_hash import anonymize_user_id, mask_nickname
 
 
 # 抖音教学版禁用字段(键):不得作为存储 dict 的 key 出现。

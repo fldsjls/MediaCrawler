@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import pytest
-import config
+import sys
+import mediacrawler.config as config
 from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
-from cmd_arg import parse_cmd
-from api.schemas import CrawlerStartRequest, PlatformEnum, LoginTypeEnum, CrawlerTypeEnum
-from api.services.crawler_manager import CrawlerManager
-from api.main import app
+from mediacrawler.cli.arguments import parse_cmd
+from mediacrawler.api.schemas import CrawlerStartRequest, PlatformEnum, LoginTypeEnum, CrawlerTypeEnum
+from mediacrawler.api.services.crawler_manager import CrawlerManager
+from mediacrawler.api.main import app
 
 @pytest.mark.asyncio
 async def test_cmd_arg_crawler_max_notes_count():
@@ -39,6 +40,7 @@ def test_crawler_manager_build_command():
         max_comments_count=None
     )
     cmd1 = cm._build_command(req1)
+    assert cmd1[:3] == [sys.executable, '-m', 'mediacrawler.cli.main']
     # Check that the custom arguments are NOT present
     assert "--crawler_max_notes_count" not in cmd1
     assert "--max_comments_count_singlenotes" not in cmd1
@@ -65,7 +67,7 @@ def test_crawler_manager_build_command():
 def test_api_start_crawler_with_limits():
     client = TestClient(app)
 
-    with patch("api.routers.crawler.crawler_manager.start", new_callable=AsyncMock) as mock_start:
+    with patch("mediacrawler.api.routers.crawler.crawler_manager.start", new_callable=AsyncMock) as mock_start:
         mock_start.return_value = True
 
         # Test case 1: with limits
@@ -90,7 +92,7 @@ def test_api_start_crawler_with_limits():
 def test_api_start_crawler_without_limits():
     client = TestClient(app)
 
-    with patch("api.routers.crawler.crawler_manager.start", new_callable=AsyncMock) as mock_start:
+    with patch("mediacrawler.api.routers.crawler.crawler_manager.start", new_callable=AsyncMock) as mock_start:
         mock_start.return_value = True
 
         # Test case 2: without limits
@@ -130,7 +132,7 @@ def test_api_rejects_invalid_limits(field_name, value):
         field_name: value,
     }
 
-    with patch("api.routers.crawler.crawler_manager.start", new_callable=AsyncMock) as mock_start:
+    with patch("mediacrawler.api.routers.crawler.crawler_manager.start", new_callable=AsyncMock) as mock_start:
         response = client.post("/api/crawler/start", json=payload)
 
     assert response.status_code == 422

@@ -23,8 +23,8 @@ Unit tests for Store Factory functionality
 import pytest
 from unittest.mock import patch, MagicMock
 
-from store.xhs import XhsStoreFactory
-from store.xhs._store_impl import (
+from mediacrawler.storage.stores.xhs import XhsStoreFactory
+from mediacrawler.storage.stores.xhs._store_impl import (
     XhsCsvStoreImplement,
     XhsJsonStoreImplement,
     XhsJsonlStoreImplement,
@@ -33,43 +33,43 @@ from store.xhs._store_impl import (
     XhsMongoStoreImplement,
     XhsExcelStoreImplement
 )
-from store.excel_store_base import ExcelStoreBase
+from mediacrawler.storage.stores.excel_store_base import ExcelStoreBase
 
 
 class TestXhsStoreFactory:
     """Test cases for XhsStoreFactory"""
 
-    @patch('config.SAVE_DATA_OPTION', 'csv')
+    @patch('mediacrawler.config.SAVE_DATA_OPTION', 'csv')
     def test_create_csv_store(self):
         """Test creating CSV store"""
         store = XhsStoreFactory.create_store()
         assert isinstance(store, XhsCsvStoreImplement)
 
-    @patch('config.SAVE_DATA_OPTION', 'json')
+    @patch('mediacrawler.config.SAVE_DATA_OPTION', 'json')
     def test_create_json_store(self):
         """Test creating JSON store"""
         store = XhsStoreFactory.create_store()
         assert isinstance(store, XhsJsonStoreImplement)
 
-    @patch('config.SAVE_DATA_OPTION', 'db')
+    @patch('mediacrawler.config.SAVE_DATA_OPTION', 'db')
     def test_create_db_store(self):
         """Test creating database store"""
         store = XhsStoreFactory.create_store()
         assert isinstance(store, XhsDbStoreImplement)
 
-    @patch('config.SAVE_DATA_OPTION', 'sqlite')
+    @patch('mediacrawler.config.SAVE_DATA_OPTION', 'sqlite')
     def test_create_sqlite_store(self):
         """Test creating SQLite store"""
         store = XhsStoreFactory.create_store()
         assert isinstance(store, XhsSqliteStoreImplement)
 
-    @patch('config.SAVE_DATA_OPTION', 'mongodb')
+    @patch('mediacrawler.config.SAVE_DATA_OPTION', 'mongodb')
     def test_create_mongodb_store(self):
         """Test creating MongoDB store"""
         store = XhsStoreFactory.create_store()
         assert isinstance(store, XhsMongoStoreImplement)
 
-    @patch('config.SAVE_DATA_OPTION', 'excel')
+    @patch('mediacrawler.config.SAVE_DATA_OPTION', 'excel')
     def test_create_excel_store(self):
         """Test creating Excel store"""
         # ContextVar cannot be mocked, so we test with actual value
@@ -77,13 +77,13 @@ class TestXhsStoreFactory:
         # XhsExcelStoreImplement 返回 ExcelStoreBase 单例，实际类型为 ExcelStoreBase
         assert isinstance(store, ExcelStoreBase)
 
-    @patch('config.SAVE_DATA_OPTION', 'jsonl')
+    @patch('mediacrawler.config.SAVE_DATA_OPTION', 'jsonl')
     def test_create_jsonl_store(self):
         """Test creating JSONL store"""
         store = XhsStoreFactory.create_store()
         assert isinstance(store, XhsJsonlStoreImplement)
 
-    @patch('config.SAVE_DATA_OPTION', 'invalid')
+    @patch('mediacrawler.config.SAVE_DATA_OPTION', 'invalid')
     def test_invalid_store_option(self):
         """Test that invalid store option raises ValueError"""
         with pytest.raises(ValueError) as exc_info:

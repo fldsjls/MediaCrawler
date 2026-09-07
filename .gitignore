@@ -9,6 +9,8 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+!scripts/build/
+!scripts/build/**
 develop-eggs/
 dist/
 downloads/
@@ -167,7 +169,8 @@ cython_debug/
 /data/
 
 */.DS_Store
-.vscode
+.vscode/*
+!.vscode/settings.json
 /node_modules
 webui/node_modules
 docs/.vitepress/cache
@@ -189,3 +192,11 @@ workers/browser-capture/node_modules/
 workers/browser-capture/storage/
 workers/browser-capture/logs/
 workers/browser-capture/tools/**/*.exe
+
+# Consolidated application layout
+/.local/
+/.build/
+src/webui/node_modules/
+src/browser-worker/node_modules/
+src/browser-worker/storage/
+src/browser-worker/logs/

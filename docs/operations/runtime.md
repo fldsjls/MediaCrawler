@@ -2,7 +2,7 @@
 
 > 文档类型：本机运维；依据统一启动脚本与会话/任务服务。
 
-从 MediaCrawler 根目录运行 `scripts/start-workbench.ps1`，默认访问 `http://127.0.0.1:8080`。只用一个服务实例管理项目 SQLite，不使用多个 worker 写同一索引。
+从 MediaCrawler 根目录运行 `scripts/runtime/start-workbench.ps1`，默认访问 `http://127.0.0.1:8080`。只用一个服务实例管理项目 SQLite，不使用多个 worker 写同一索引。
 
 启动终端 Ctrl+C 关闭并清理所属进程。异常退出后任务标记中断，先检查结果再重试，不自动采集。
 

@@ -1,6 +1,6 @@
 [project]
 name = "mediacrawler"
-author = "程序员阿江-Relakkes <relakkes@gmail.com>"
+authors = [{name = "程序员阿江-Relakkes", email = "relakkes@gmail.com"}]
 version = "0.1.0"
 description = "A social media crawler project, support Xiaohongshu, Weibo, Zhihu, Bilibili, Douyin, BaiduTieBa etc."
 readme = "README.md"
@@ -47,3 +47,24 @@ dependencies = [
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mediacrawler*"]
+
+[tool.setuptools.package-data]
+mediacrawler = ["resources/js/*.js", "workbench/preview/*.js"]
+
+[project.scripts]
+mediacrawler = "mediacrawler.cli.main:entrypoint"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-m 'not external'"
+markers = ["external: requires explicitly configured external databases or proxy services"]
+cache_dir = ".local/cache/pytest"

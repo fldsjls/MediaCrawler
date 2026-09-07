@@ -33,7 +33,7 @@ try:
 except ImportError:
     EXCEL_AVAILABLE = False
 
-from store.excel_store_base import ExcelStoreBase
+from mediacrawler.storage.stores.excel_store_base import ExcelStoreBase
 
 
 @pytest.mark.skipif(not EXCEL_AVAILABLE, reason="openpyxl not installed")
@@ -60,6 +60,7 @@ class TestExcelStoreBase:
         """Create ExcelStoreBase instance for testing"""
         # Monkey patch data directory
         monkeypatch.chdir(temp_dir)
+        monkeypatch.setattr('mediacrawler.storage.stores.excel_store_base.DATA_ROOT', Path(temp_dir) / 'data')
         store = ExcelStoreBase(platform="test", crawler_type="search")
         yield store
         # Cleanup is handled by temp_dir fixture
@@ -204,6 +205,7 @@ class TestSingletonPattern:
         """Setup and teardown for each test"""
         # Change to temp directory
         monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr('mediacrawler.storage.stores.excel_store_base.DATA_ROOT', tmp_path / 'data')
         # Clear singleton instances before each test
         ExcelStoreBase._instances.clear()
         yield

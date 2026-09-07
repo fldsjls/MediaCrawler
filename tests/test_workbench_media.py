@@ -13,13 +13,13 @@ from types import SimpleNamespace
 
 import pytest
 
-from api.workbench.browser import BrowserSession, BrowserSessions
-from api.workbench.media.capture import MediaCapture, classify, manifest_status
-from api.workbench.media.downloader import MediaProxy, download
-from api.workbench.media.identity import resource_identity
-from api.workbench.models import SessionConfig
+from mediacrawler.workbench.browser import BrowserSession, BrowserSessions
+from mediacrawler.workbench.media.capture import MediaCapture, classify, manifest_status
+from mediacrawler.workbench.media.downloader import MediaProxy, download
+from mediacrawler.workbench.media.identity import resource_identity
+from mediacrawler.workbench.models import SessionConfig
 
-TOOLS = Path(__file__).resolve().parents[1] / 'workers/browser-capture/tools'
+TOOLS = Path(__file__).resolve().parents[1] / '.local/tools'
 
 
 @pytest.fixture(scope='module')

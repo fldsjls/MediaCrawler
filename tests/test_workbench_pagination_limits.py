@@ -5,8 +5,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from api.workbench.platform_worker import install_pagination_limits
-from api.workbench.runtime import Runtime
+from mediacrawler.workbench.platform_worker import install_pagination_limits
+from mediacrawler.workbench.runtime import Runtime
 
 
 def runtime():
@@ -26,7 +26,7 @@ def runtime():
 async def test_creator_perpetual_pages_stop_after_shared_budget_and_finish_callbacks(
     monkeypatch, platform, module_name, class_name, page_method, all_method,
 ):
-    module = importlib.import_module(f'media_platform.{module_name}.client')
+    module = importlib.import_module(f'mediacrawler.platforms.{module_name}.client')
     parent = getattr(module, class_name)
     calls, completed = [], []
     content_ids = set()
@@ -78,9 +78,9 @@ async def test_creator_perpetual_pages_stop_after_shared_budget_and_finish_callb
     ('bili', 'bilibili', 'BilibiliClient'),
 ])
 async def test_root_and_child_comments_share_request_budget(monkeypatch, platform, module_name, class_name):
-    import config
+    import mediacrawler.config as config
     monkeypatch.setattr(config, 'ENABLE_GET_SUB_COMMENTS', True)
-    module = importlib.import_module(f'media_platform.{module_name}.client')
+    module = importlib.import_module(f'mediacrawler.platforms.{module_name}.client')
     if hasattr(module, 'random'):
         monkeypatch.setattr(module.random, 'uniform', lambda *_: 0)
     parent = getattr(module, class_name)
@@ -132,7 +132,7 @@ async def test_root_and_child_comments_share_request_budget(monkeypatch, platfor
 
 @pytest.mark.asyncio
 async def test_zhihu_root_and_child_budget_uses_owning_content_context():
-    from media_platform.zhihu.client import ZhiHuClient
+    from mediacrawler.platforms.zhihu.client import ZhiHuClient
     calls = []
 
     class Fixture(ZhiHuClient):
@@ -157,9 +157,9 @@ async def test_zhihu_root_and_child_budget_uses_owning_content_context():
 
 @pytest.mark.asyncio
 async def test_tieba_html_sub_comments_stop_before_later_roots(monkeypatch):
-    import config
-    from media_platform.tieba.client import BaiduTieBaClient
-    from model.m_baidu_tieba import TiebaComment
+    import mediacrawler.config as config
+    from mediacrawler.platforms.tieba.client import BaiduTieBaClient
+    from mediacrawler.platforms.models.m_baidu_tieba import TiebaComment
     monkeypatch.setattr(config, 'ENABLE_GET_SUB_COMMENTS', True)
     monkeypatch.setattr(config, 'CRAWLER_MAX_SLEEP_SEC', 0)
     calls = []
@@ -192,7 +192,7 @@ async def test_tieba_html_sub_comments_stop_before_later_roots(monkeypatch):
 @pytest.mark.asyncio
 @pytest.mark.parametrize('empty', [False, True])
 async def test_creator_repeating_cursor_or_empty_more_page_stops(empty):
-    from media_platform.douyin.client import DouYinClient
+    from mediacrawler.platforms.douyin.client import DouYinClient
     calls = []
     class Fixture(DouYinClient):
         async def get_user_aweme_posts(self, sec_user_id, max_cursor=''):
@@ -208,9 +208,9 @@ async def test_creator_repeating_cursor_or_empty_more_page_stops(empty):
 async def test_weibo_without_abstract_base_still_pauses_and_refreshes_cookies():
     import asyncio
     import types
-    from base.base_crawler import AbstractApiClient
-    from media_platform.weibo.client import WeiboClient
-    from api.workbench.platform_worker import install_request_barrier, refresh_adapter_login
+    from mediacrawler.common.base.base_crawler import AbstractApiClient
+    from mediacrawler.platforms.weibo.client import WeiboClient
+    from mediacrawler.workbench.platform_worker import install_request_barrier, refresh_adapter_login
     calls = []
     class Fixture(WeiboClient):
         __module__ = 'fixture.weibo'
@@ -246,9 +246,9 @@ async def test_weibo_without_abstract_base_still_pauses_and_refreshes_cookies():
 async def test_multiple_search_keywords_do_not_request_after_common_limit(
     monkeypatch, platform, module_name, class_name, method_name, empty_field,
 ):
-    import config
+    import mediacrawler.config as config
     monkeypatch.setattr(config, 'CRAWLER_MAX_NOTES_COUNT', 20)
-    module = importlib.import_module(f'media_platform.{module_name}.client')
+    module = importlib.import_module(f'mediacrawler.platforms.{module_name}.client')
     seen, requests = set(), []
     async def original(self, keyword, **kwargs):
         requests.append(keyword)

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import config
+import mediacrawler.config as config
 import pytest
-from cmd_arg import parse_cmd
-from media_platform.tieba import TieBaCrawler
+from mediacrawler.cli.arguments import parse_cmd
+from mediacrawler.platforms.tieba import TieBaCrawler
 
 
 @pytest.mark.asyncio

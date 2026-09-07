@@ -1,4 +1,5 @@
 > 文档类型：上游 CLI 参考
+> 路径说明：本文流程图保留 CLI 模块简称；实际源码统一位于 `src/mediacrawler/`，完整映射见[目录约定](/architecture/repository-layout.md)。
 > 范围：本页描述保留的命令行流程。当前 Web 工作台以[操作指南](/guides/collection.md)为准；两者安装入口、配置作用域与输出索引不同。
 
 # MediaCrawler 项目架构文档
@@ -148,64 +149,19 @@ flowchart LR
 
 ## 3. 目录结构
 
+```text
+src/mediacrawler/
+├── cli/                 # 命令行入口、参数、短信转发
+├── common/              # 抽象基类、上下文
+├── config/              # CLI 与平台配置
+├── platforms/           # 各平台采集器、模型、常量
+├── storage/             # 数据库与各平台存储实现
+├── infrastructure/      # 缓存、代理、浏览器与文件工具
+├── resources/js/        # JavaScript 静态资源
+├── api/                 # HTTP API
+└── workbench/           # 任务、浏览器会话、预览、结果
 ```
-MediaCrawler/
-├── main.py                 # 程序入口
-├── var.py                  # 全局上下文变量
-├── pyproject.toml          # 项目配置
-│
-├── base/                   # 基础抽象类
-│   └── base_crawler.py     # 爬虫、登录、存储、客户端基类
-│
-├── config/                 # 配置管理
-│   ├── base_config.py      # 核心配置
-│   ├── db_config.py        # 数据库配置
-│   └── {platform}_config.py # 平台特定配置
-│
-├── media_platform/         # 平台爬虫实现
-│   ├── xhs/                # 小红书
-│   ├── douyin/             # 抖音
-│   ├── kuaishou/           # 快手
-│   ├── bilibili/           # B站
-│   ├── weibo/              # 微博
-│   ├── tieba/              # 百度贴吧
-│   └── zhihu/              # 知乎
-│
-├── store/                  # 数据存储
-│   ├── excel_store_base.py # Excel存储基类
-│   └── {platform}/         # 各平台存储实现
-│
-├── database/               # 数据库层
-│   ├── models.py           # ORM模型定义
-│   ├── db_session.py       # 数据库会话管理
-│   └── mongodb_store_base.py # MongoDB基类
-│
-├── proxy/                  # 代理管理
-│   ├── proxy_ip_pool.py    # IP池管理
-│   ├── proxy_mixin.py      # 代理刷新混入
-│   └── providers/          # 代理提供商
-│
-├── cache/                  # 缓存系统
-│   ├── abs_cache.py        # 缓存抽象类
-│   ├── local_cache.py      # 本地缓存
-│   └── redis_cache.py      # Redis缓存
-│
-├── tools/                  # 工具模块
-│   ├── app_runner.py       # 应用运行管理
-│   ├── browser_launcher.py # 浏览器启动
-│   ├── cdp_browser.py      # CDP浏览器管理
-│   ├── crawler_util.py     # 爬虫工具
-│   └── async_file_writer.py # 异步文件写入
-│
-├── model/                  # 数据模型
-│   └── m_{platform}.py     # Pydantic模型
-│
-├── libs/                   # JS脚本库
-│   └── stealth.min.js      # 反检测脚本
-│
-└── cmd_arg/                # 命令行参数
-    └── arg.py              # 参数定义
-```
+
 
 ---
 
@@ -335,7 +291,7 @@ sequenceDiagram
 每个平台目录包含以下核心文件：
 
 ```
-media_platform/{platform}/
+src/mediacrawler/platforms/{platform}/
 ├── __init__.py         # 模块导出
 ├── core.py             # 爬虫主实现类
 ├── client.py           # API客户端
@@ -774,7 +730,7 @@ flowchart TB
 
     subgraph Core["核心层"]
         base["base/base_crawler.py"]
-        platforms["media_platform/*/"]
+        platforms["src/mediacrawler/platforms/*/"]
     end
 
     subgraph Client["客户端层"]
@@ -828,18 +784,18 @@ flowchart TB
 
 ### 11.1 添加新平台
 
-1. 在 `media_platform/` 下创建新目录
+1. 在 `src/mediacrawler/platforms/` 下创建新目录
 2. 实现以下核心文件：
    - `core.py` - 继承 `AbstractCrawler`
    - `client.py` - 继承 `AbstractApiClient` 和 `ProxyRefreshMixin`
    - `login.py` - 继承 `AbstractLogin`
    - `field.py` - 定义平台枚举
-3. 在 `store/` 下创建对应存储目录
-4. 在 `main.py` 的 `CrawlerFactory.CRAWLERS` 中注册
+3. 在 `src/mediacrawler/storage/stores/` 下创建对应存储目录
+4. 在 `src/mediacrawler/cli/main.py` 的 `CrawlerFactory.CRAWLERS` 中注册
 
 ### 11.2 添加新存储方式
 
-1. 在 `store/` 下创建新的存储实现类
+1. 在 `src/mediacrawler/storage/stores/` 下创建新的存储实现类
 2. 继承 `AbstractStore` 基类
 3. 实现 `store_content`、`store_comment`、`store_creator` 方法
 4. 在各平台的 `StoreFactory.STORES` 中注册
@@ -859,29 +815,29 @@ flowchart TB
 
 ```bash
 # 启动爬虫
-python main.py
+python -m mediacrawler.cli.main
 
 # 指定平台
-python main.py --platform xhs
+python -m mediacrawler.cli.main --platform xhs
 
 # 指定登录方式
-python main.py --lt qrcode
+python -m mediacrawler.cli.main --lt qrcode
 
 # 指定爬虫类型
-python main.py --type search
+python -m mediacrawler.cli.main --type search
 ```
 
 ### 12.2 关键文件路径
 
 | 用途 | 文件路径 |
 |------|---------|
-| 程序入口 | `main.py` |
-| 核心配置 | `config/base_config.py` |
-| 数据库配置 | `config/db_config.py` |
+| 程序入口 | `src/mediacrawler/cli/main.py` |
+| 核心配置 | `src/mediacrawler/config/base_config.py` |
+| 数据库配置 | `src/mediacrawler/config/db_config.py` |
 | 爬虫基类 | `base/base_crawler.py` |
-| ORM模型 | `database/models.py` |
+| ORM模型 | `src/mediacrawler/storage/database/models.py` |
 | 代理池 | `proxy/proxy_ip_pool.py` |
-| CDP浏览器 | `tools/cdp_browser.py` |
+| CDP浏览器 | `src/mediacrawler/infrastructure/helpers/cdp_browser.py` |
 
 ---
 

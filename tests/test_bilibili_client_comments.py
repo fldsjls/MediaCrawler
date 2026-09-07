@@ -9,7 +9,7 @@
 
 import pytest
 
-from media_platform.bilibili.client import BilibiliClient
+from mediacrawler.platforms.bilibili.client import BilibiliClient
 
 
 @pytest.mark.asyncio

@@ -5,8 +5,8 @@ import subprocess
 
 import pytest
 
-from api.workbench.browser import kill_tree
-from api.workbench.service import WORKER
+from mediacrawler.workbench.browser import kill_tree
+from mediacrawler.workbench.service import WORKER
 
 
 @pytest.mark.asyncio

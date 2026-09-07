@@ -8,7 +8,7 @@ import pytest
 
 @pytest.mark.parametrize('video,images,expected', [(False, False, []), (True, False, ['video']), (False, True, ['image']), (True, True, ['video', 'image'])])
 def test_capture_resource_types_and_independent_choices(video, images, expected):
-    worker = Path(__file__).resolve().parents[1] / 'workers' / 'browser-capture'
+    worker = Path(__file__).resolve().parents[1] / 'src' / 'browser-worker'
     config = {'platform': 'generic', 'target': 'https://fixture.test', 'max_items': 5,
               'max_downloads': 5, 'media': True, 'download_video': video, 'download_images': images}
     script = '''import { captured } from './src/workbench/runtime.ts';

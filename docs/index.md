@@ -40,7 +40,7 @@ features:
 | 查找文件或重试失败 | [结果管理](guides/results.md) | [数据导入](operations/migration.md) |
 | 修改适配器或界面 | [开发入口](development/index.md) | [职责边界](architecture/layer-boundaries.md) |
 | 查以前的测试结果 | [历史快照](history/index.md) | [当前验收方法](development/quality.md) |
-| 使用原平台命令行 | [CLI 参考](guides/cli.md) | [CLI 存储](guides/cli-storage.md) |
+| 使用原平台命令行 | [CLI 参考](guides/cli/index.md) | [CLI 存储](guides/cli/storage.md) |
 
 ## 文档的事实边界
 

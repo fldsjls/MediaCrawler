@@ -23,7 +23,7 @@ uv sync
 ```shell
 uv run playwright install
 ```
-> 项目已支持使用 Playwright 连接本地 Chrome。如需使用 CDP 方式，可在 `config/base_config.py` 中调整 `xhs` 和 `dy` 的相关配置。
+> 项目已支持使用 Playwright 连接本地 Chrome。如需使用 CDP 方式，可在 `src/mediacrawler/config/base_config.py` 中调整 `xhs` 和 `dy` 的相关配置。
 
 ### 4. 运行爬虫程序
 ```shell
@@ -31,13 +31,13 @@ uv run playwright install
 # 其他功能开关也可在 config/base_config.py 查看，均有中文注释
 
 # 从配置中读取关键词搜索并爬取帖子与评论
-uv run main.py --platform xhs --lt qrcode --type search
+uv run mediacrawler --platform xhs --lt qrcode --type search
 
 # 从配置中读取指定帖子ID列表并爬取帖子与评论
-uv run main.py --platform xhs --lt qrcode --type detail
+uv run mediacrawler --platform xhs --lt qrcode --type detail
 
 # 其他平台示例
-uv run main.py --help
+uv run mediacrawler --help
 ```
 
 ## 备选方案：Python 原生 venv（不推荐）
@@ -67,11 +67,11 @@ playwright install
 ### 运行爬虫程序（venv 环境）
 ```shell
 # 从配置中读取关键词搜索并爬取帖子与评论
-python main.py --platform xhs --lt qrcode --type search
+python -m mediacrawler.cli.main --platform xhs --lt qrcode --type search
 
 # 从配置中读取指定帖子ID列表并爬取帖子与评论
-python main.py --platform xhs --lt qrcode --type detail
+python -m mediacrawler.cli.main --platform xhs --lt qrcode --type detail
 
 # 更多示例
-python main.py --help
+python -m mediacrawler.cli.main --help
 ```

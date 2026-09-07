@@ -1,5 +1,5 @@
-from api.workbench.models import TaskConfig
-from api.workbench.repository import Repository
+from mediacrawler.workbench.models import TaskConfig
+from mediacrawler.workbench.repository import Repository
 
 
 def test_restart_interrupts_running_and_queued_but_retains_results(tmp_path):

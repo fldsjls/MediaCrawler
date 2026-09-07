@@ -14,11 +14,11 @@
 
 以下页面不替代 Web 工作台任务配置：
 
-- [CLI 启动](cli.md)
-- [CLI CDP 模式](cli-cdp.md)
-- [CLI 数据存储](cli-storage.md)
-- [CLI Excel 导出](cli-excel.md)
-- [CLI 词云](cli-wordcloud.md)
-- [CLI 手机号登录](cli-phone-login.md)
+- [CLI 启动](cli/index.md)
+- [CLI CDP 模式](cli/cdp.md)
+- [CLI 数据存储](cli/storage.md)
+- [CLI Excel 导出](cli/excel.md)
+- [CLI 词云](cli/wordcloud.md)
+- [CLI 手机号登录](cli/phone-login.md)
 
 代理与常见问题归入[运维](../operations/index.md)。

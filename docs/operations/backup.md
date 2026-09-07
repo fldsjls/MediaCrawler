@@ -2,7 +2,7 @@
 
 > 文档类型：本机资料维护；没有自动覆盖恢复流程。
 
-`data/workbench/index.sqlite3` 保存索引，`tasks` 保存输出，`profiles` 保存登录资料，`imports` 保存导入副本。相关数据应一起备份。
+`.local/data/workbench/index.sqlite3` 保存索引，`tasks` 保存输出，`profiles` 保存登录资料，`imports` 保存导入副本。相关数据应一起备份。
 
 关闭工作台并确认浏览器退出后复制，避免只复制活动 SQLite 主文件或写入中的 Profile。保留原副本、版本和时间，不覆盖运行中的项目。
 

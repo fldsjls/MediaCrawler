@@ -8,7 +8,7 @@ import pytest
 from websockets.asyncio.client import connect
 from websockets.asyncio.server import serve
 
-from api.workbench.preview.cdp import CaptureChannel, open_capture_channel
+from mediacrawler.workbench.preview.cdp import CaptureChannel, open_capture_channel
 
 
 @asynccontextmanager

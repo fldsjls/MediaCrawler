@@ -7,8 +7,8 @@ import httpx
 import pytest
 from tenacity import RetryError
 
-from media_platform.xhs.client import XiaoHongShuClient
-from media_platform.xhs.exception import IPBlockError, PlatformAccessError
+from mediacrawler.platforms.xhs.client import XiaoHongShuClient
+from mediacrawler.platforms.xhs.exception import IPBlockError, PlatformAccessError
 
 
 class FakeAsyncClient:
@@ -50,7 +50,7 @@ async def test_raw_response_rejects_access_http_status(monkeypatch, status_code)
         )
 
     monkeypatch.setattr(
-        "media_platform.xhs.client.make_async_client",
+        "mediacrawler.platforms.xhs.client.make_async_client",
         lambda **kwargs: FakeAsyncClient(request_impl),
     )
 
@@ -87,7 +87,7 @@ async def test_raw_response_rejects_known_business_block(
         )
 
     monkeypatch.setattr(
-        "media_platform.xhs.client.make_async_client",
+        "mediacrawler.platforms.xhs.client.make_async_client",
         lambda **kwargs: FakeAsyncClient(request_impl),
     )
 
@@ -111,7 +111,7 @@ async def test_raw_response_keeps_successful_html(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "media_platform.xhs.client.make_async_client",
+        "mediacrawler.platforms.xhs.client.make_async_client",
         lambda **kwargs: FakeAsyncClient(request_impl),
     )
 
@@ -136,7 +136,7 @@ async def test_successful_json_keeps_raw_and_parsed_return_modes(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "media_platform.xhs.client.make_async_client",
+        "mediacrawler.platforms.xhs.client.make_async_client",
         lambda **kwargs: FakeAsyncClient(request_impl),
     )
     client = make_client()
@@ -163,7 +163,7 @@ async def test_html_detail_does_not_multiply_transport_retries(monkeypatch):
         raise httpx.ReadTimeout("timed out", request=httpx.Request(method, url))
 
     monkeypatch.setattr(
-        "media_platform.xhs.client.make_async_client",
+        "mediacrawler.platforms.xhs.client.make_async_client",
         lambda **kwargs: FakeAsyncClient(request_impl),
     )
 

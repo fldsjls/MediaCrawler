@@ -6,7 +6,7 @@ README 定位和启动，docs 长期说明。新增页面进入 getting-started�
 
 每区有 index.md 并列直接子页。架构保存职责，指南保存操作，ADR 保存决策，history 必须带日期和范围。旧数字不因搬迁变成当前事实。
 
-移动页面更新 `.vitepress/migrations.json`，旧路径保留提示。上游 CLI、存储、作者、许可、推广分类保留，推广不进主导航。本站移除上游 GA 和错误编辑链接。
+移动页面更新内部链接；必要的旧网址集中记录在 `.vitepress/redirects.json`，构建时生成跳转 HTML，不保留占位 Markdown。上游 CLI、存储、作者、许可、推广分类保留，推广不进主导航。本站移除上游 GA 和错误编辑链接。
 
 ```powershell
 npm run docs:check

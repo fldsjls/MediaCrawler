@@ -1,11 +1,15 @@
 """Native sender isolation and cleanup; real video acceptance uses local Chromium."""
 import asyncio
+import shutil
+import subprocess
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
-from api.workbench.preview.internal import is_internal_preview_url, public_pages
-from api.workbench.preview.native import NativeRTCStreams, SenderServer
+from mediacrawler.workbench.preview.internal import is_internal_preview_url, public_pages
+from mediacrawler.workbench.preview.native import NativeRTCStreams, SenderServer
+from mediacrawler.workbench.preview import native as native_module
 
 
 def test_internal_pages_are_not_collection_targets():
@@ -101,6 +105,27 @@ async def test_pending_offers_count_toward_limit_and_cancel_cleanly():
 
 
 @pytest.mark.asyncio
+async def test_offer_deadline_releases_pending_peer_and_preserves_failure_stage(monkeypatch):
+    page = SimpleNamespace(url='http://127.0.0.1/', is_closed=lambda: False)
+    session = SimpleNamespace(id='fixture', page=page, control_lock=asyncio.Lock(), frame_hub=SimpleNamespace(epoch=0))
+    rtc = NativeRTCStreams(session)
+    timeout = asyncio.timeout
+    monkeypatch.setattr(native_module.asyncio, 'timeout', lambda _seconds: timeout(.03))
+
+    async def capture(_page):
+        rtc.phase = '匹配浏览器视口'
+        await asyncio.Event().wait()
+
+    rtc._capture = capture
+    with pytest.raises(RuntimeError, match='匹配浏览器视口'):
+        await rtc.offer('offer', 'offer')
+    assert '匹配浏览器视口' in rtc.snapshot()['error']
+    assert not rtc.peers and not rtc.offers and not rtc.closing
+    assert not session.control_lock.locked()
+    await rtc.close()
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize('missing', [False, True])
 async def test_watcher_releases_active_peers_when_helper_disappears(missing):
     rtc = NativeRTCStreams(SimpleNamespace(id='fixture'))
@@ -126,3 +151,116 @@ async def test_watcher_does_not_invalidate_a_pending_helper_creation():
         watcher.cancel()
         await asyncio.gather(watcher, return_exceptions=True)
         await rtc.close()
+
+
+def test_native_sender_keeps_stream_for_reserved_replacement_peer():
+    """Execute the actual sender JS with deterministic browser API doubles."""
+    script = r'''
+const assert = require('node:assert/strict');
+const vm = require('node:vm');
+const fs = require('node:fs');
+let stopped = 0;
+const config = {handle:'owned',origin:'http://127.0.0.1:1',sourceFps:60};
+const makeStream = () => {
+  const track = {readyState:'live',enabled:true,
+    getSettings:()=>({displaySurface:'browser',width:1280,height:720}),
+    getCaptureHandle:()=>({handle:config.handle,origin:config.origin}),
+    addEventListener(){},stop(){this.readyState='ended';stopped++}};
+  return {getTracks:()=>[track],getVideoTracks:()=>[track]};
+};
+class Peer {
+  constructor(){this.connectionState='connected';this.iceGatheringState='complete'}
+  async setRemoteDescription(){}
+  getTransceivers(){return [{receiver:{track:{kind:'video'}}}]}
+  addTrack(){return {getParameters:()=>({encodings:[{}]}),setParameters:async()=>{}}}
+  async createAnswer(){return {type:'answer',sdp:'answer'}}
+  async setLocalDescription(value){this.localDescription=value}
+  close(){this.connectionState='closed'}
+}
+const sandbox={navigator:{mediaDevices:{getDisplayMedia:async()=>makeStream()}},
+  document:{querySelector:()=>({})},RTCPeerConnection:Peer,
+  setTimeout:()=>1,clearTimeout(){}};
+sandbox.window=sandbox;
+vm.runInNewContext(fs.readFileSync(process.argv[1],'utf8'),sandbox);
+(async()=>{
+ const api=sandbox.NativePreview;
+ await api.capture(config);
+ api.reserve('old'); await api.answer({id:'old',sdp:'offer',sourceFps:60});
+ // This is the production race: B has reused the stream, but has not yet
+ // registered its RTCPeerConnection when DELETE for A arrives.
+ api.reserve('replacement'); api.closePeer('old');
+ assert.equal(stopped,0); assert.equal(api.state().capture,true);
+ assert.equal(api.state().reserved[0],'replacement');
+ await api.answer({id:'replacement',sdp:'offer',sourceFps:60});
+ assert.equal(api.state().reserved.length,0);
+ api.closePeer('replacement'); assert.equal(stopped,1);
+ assert.equal(api.state().capture,false);
+ await api.capture(config); api.reserve('cancelled'); api.closePeer('cancelled');
+ assert.equal(stopped,2); assert.equal(api.state().reserved.length,0);
+ await api.capture(config); api.reserve('reset'); api.reset();
+ assert.equal(stopped,3); assert.equal(api.state().reserved.length,0);
+ await assert.rejects(()=>api.answer({id:'reset'}),/已取消/);
+})().catch(error=>{console.error(error);process.exitCode=1});
+'''
+    node = shutil.which('node')
+    assert node, 'Node.js is required by the browser capture worker'
+    result = subprocess.run([node, '-e', script, str(Path(native_module.__file__).with_name('native_sender.js'))],
+                            capture_output=True, text=True, encoding='utf-8', timeout=10)
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.asyncio
+async def test_stream_reservation_is_locked_but_ice_negotiation_is_not():
+    page = SimpleNamespace(url='http://127.0.0.1/', is_closed=lambda: False)
+    session = SimpleNamespace(id='fixture', page=page, control_lock=asyncio.Lock(), frame_hub=SimpleNamespace(epoch=0))
+    rtc = NativeRTCStreams(session)
+    calls = []
+    class Helper:
+        def is_closed(self): return False
+        async def evaluate(self, script, value=None):
+            if 'reserve' in script:
+                assert rtc.lock.locked() and session.control_lock.locked()
+                calls.append('reserved')
+            elif 'answer' in script:
+                assert not rtc.lock.locked() and not session.control_lock.locked()
+                assert calls == ['reserved']
+                return {'id': value['id'], 'sdp':'answer', 'type':'answer'}
+        async def close(self): pass
+    rtc.helper = Helper()
+    async def capture(_page): rtc.source_fps = 60
+    rtc._capture = capture
+    try:
+        answer = await rtc.offer('offer', 'offer')
+        assert rtc.peers[answer['id']] == 'active'
+    finally:
+        await rtc.close()
+
+
+@pytest.mark.asyncio
+async def test_capture_click_uses_static_dom_rect_and_real_mouse_without_locator(monkeypatch):
+    calls = []
+    page = SimpleNamespace(is_closed=lambda: True)
+    session = SimpleNamespace(id='fixture', preview_settings={'realtime_fps':60})
+    rtc = NativeRTCStreams(session)
+    class Mouse:
+        async def click(self, x, y): calls.append(('mouse', x, y))
+    class Helper:
+        mouse = Mouse()
+        def locator(self, *_): raise AssertionError('Capture must not wait on locator polling')
+        async def bring_to_front(self): calls.append('front')
+        async def evaluate(self, script, *args):
+            if script == 'NativePreview.state()': return {'capture':False,'needsIdentity':False}
+            if 'getBoundingClientRect' in script:
+                calls.append('rect')
+                return {'x':120,'y':24}
+            if 'includes(window.captureResult' in script: return True
+            if script == 'window.captureResult': return {'phase':'captured'}
+            if script == 'NativePreview.state().settings': return {'width':1280,'height':720}
+    helper = Helper()
+    async def get_helper(): return helper
+    async def identity(*_): return {'origin':'http://127.0.0.1','title':'owned'}
+    async def fit(*_): calls.append('fit')
+    rtc._helper, rtc._identity = get_helper, identity
+    monkeypatch.setattr(native_module, 'fit_native_viewport', fit)
+    await rtc._capture(page)
+    assert calls == ['front','rect',('mouse',120,24),'fit']

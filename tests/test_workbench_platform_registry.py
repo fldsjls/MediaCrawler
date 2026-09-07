@@ -4,11 +4,11 @@ from types import SimpleNamespace
 import pytest
 from pydantic import ValidationError
 
-from api.workbench.browser import BrowserSession
-from api.workbench.models import SessionConfig, TaskConfig
-from api.workbench.platforms.registry import PlatformDefinition, PlatformRegistry
-from api.workbench.repository import Repository
-from api.workbench.service import Workbench
+from mediacrawler.workbench.browser import BrowserSession
+from mediacrawler.workbench.models import SessionConfig, TaskConfig
+from mediacrawler.workbench.platforms.registry import PlatformDefinition, PlatformRegistry
+from mediacrawler.workbench.repository import Repository
+from mediacrawler.workbench.service import Workbench
 
 
 def test_platform_categories_are_not_executable_capabilities(tmp_path):

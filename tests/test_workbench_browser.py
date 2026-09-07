@@ -9,8 +9,8 @@ import pytest
 from PIL import Image
 from playwright.async_api import async_playwright
 
-from api.workbench.browser import BrowserSession
-from api.workbench.models import SessionConfig
+from mediacrawler.workbench.browser import BrowserSession
+from mediacrawler.workbench.models import SessionConfig
 
 
 @pytest.mark.asyncio
@@ -19,6 +19,7 @@ async def test_screenshot_fallback_does_not_wait_for_idle_watchdog(tmp_path):
     session = BrowserSession(SessionConfig(platform='generic'), tmp_path)
     session.preview_settings['snapshot_fps'] = 5
     delivered = asyncio.Queue()
+    captured_at = []
     picture = io.BytesIO()
     Image.new('RGB', (1280, 720)).save(picture, format='JPEG')
 
@@ -28,6 +29,7 @@ async def test_screenshot_fallback_does_not_wait_for_idle_watchdog(tmp_path):
         async def set_viewport_size(self, _size):
             pass
         async def screenshot(self, **_kwargs):
+            captured_at.append(time.monotonic())
             return picture.getvalue()
 
     class UnsupportedCDP:
@@ -50,13 +52,17 @@ async def test_screenshot_fallback_does_not_wait_for_idle_watchdog(tmp_path):
     session.context = SimpleNamespace(new_cdp_session=new_cdp)
     sender = asyncio.create_task(session.frames(Viewer()))
     try:
-        stamp, first = await asyncio.wait_for(delivered.get(), 2)
+        _, first = await asyncio.wait_for(delivered.get(), 2)
         assert first['mode'] == 'screenshot'
+        previous = first['seq']
         for _ in range(3):
-            next_stamp, message = await asyncio.wait_for(delivered.get(), .8)
-            assert next_stamp - stamp >= .18  # retain the configured five-frame budget
+            _, message = await asyncio.wait_for(delivered.get(), .8)
             assert message['mode'] == 'screenshot'
-            stamp = next_stamp
+            assert message['seq'] > previous
+            previous = message['seq']
+        # Measure producer cadence. A delayed subscriber can receive two queued
+        # frames closer together even while capture itself respects the budget.
+        assert captured_at[-1] - captured_at[0] >= (len(captured_at) - 1) * .18
     finally:
         sender.cancel()
         await asyncio.gather(sender, return_exceptions=True)

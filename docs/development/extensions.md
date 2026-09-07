@@ -5,7 +5,7 @@
 ## 当前目录
 
 ```text
-api/workbench/
+src/mediacrawler/workbench/
   platforms/         catalog、registry、contracts：类型、定义、注册和扩展契约
   adapters/          平台专属媒体解析与原存储接入
   media/             capture、identity、downloader：候选、身份和传输
@@ -24,12 +24,12 @@ api/workbench/
   template_worker.py 声明式网站模板执行入口
   migration.py       显式数据/Profile 导入
   compat.py          原 API 兼容桥
-webui/src/workbench/ React 页面、配置、平台管理、工作区和结果
+src/webui/src/workbench/ React 页面、配置、平台管理、工作区和结果
   SettingsCenter.tsx 分类、子项、详情与设置动作
   useBrowserPresentation.ts RTC / JPEG 切换、清理与降级
-media_platform/      上游平台发现、登录、详情与评论
+src/mediacrawler/platforms/      上游平台发现、登录、详情与评论
 store/               上游内容字段、脱敏与存储
-workers/browser-capture/
+src/browser-worker/
   src/workbench/     内部 Node 入口与协议
   src/sites/         迁入课程及历史网页采集
 scripts/             统一安装、启动、环境和工具校验
@@ -89,10 +89,10 @@ worker 通过 JSON 行发送 `record`、`resource`、`phase`、`state`、`failur
 在项目根目录执行：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check-workbench.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\validation\check-workbench.ps1
 .venv\Scripts\python.exe -m pytest tests/test_workbench_media_adapters.py tests/test_workbench_media_node.py -q
-npm --prefix workers/browser-capture run check
-npm --prefix webui run build
+npm --prefix src/browser-worker run check
+npm --prefix src/webui run build
 npm run docs:build
 ```
 

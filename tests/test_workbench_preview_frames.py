@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from api.workbench.preview.frames import FrameHub
+from mediacrawler.workbench.preview.frames import FrameHub
 
 
 @pytest.mark.asyncio

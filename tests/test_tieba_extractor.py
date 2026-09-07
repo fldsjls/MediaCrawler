@@ -2,11 +2,11 @@
 
 from pathlib import Path
 
-from media_platform.tieba.help import TieBaExtractor
-from model.m_baidu_tieba import TiebaComment
+from mediacrawler.platforms.tieba.help import TieBaExtractor
+from mediacrawler.platforms.models.m_baidu_tieba import TiebaComment
 
 
-FIXTURE_DIR = Path(__file__).parent.parent / "media_platform" / "tieba" / "test_data"
+FIXTURE_DIR = Path(__file__).parent / "fixtures" / "tieba"
 
 
 def read_fixture(name: str) -> str:

@@ -1,6 +1,6 @@
 # 架构与职责边界
 
-> 当前架构契约；核对日期：2026-09-07。代码依据为 `api/workbench`、`webui/src/workbench`、`media_platform`、`store` 与 `workers/browser-capture`。
+> 当前架构契约；核对日期：2026-09-07。代码依据为 `src/mediacrawler/workbench`、`src/webui/src/workbench`、`src/mediacrawler/platforms`、`src/mediacrawler/storage/stores` 与 `src/browser-worker`。
 
 本工作台采用 Office_Portal 文档中的职责判断方式：分别确定数据、规则、页面、文件的 owner，并规定依赖方向。这里沿用 MediaCrawler 的 FastAPI、React 与 worker 结构，不引入 Django 的应用目录或模型体系。
 
@@ -21,12 +21,12 @@
 | 低刷新画面与内部页 | `preview/frames.py`、`preview/cdp.py`、`preview/internal.py` | 单生产者最新 JPEG、截图后备、内部页统一识别 | 平台资源归属、创建第二采集浏览器 |
 | 项目设置 | `settings.py`、`settings_router.py` | 浏览器默认值、枚举校验、SQLite 合并保存 | 页面层级、运行任务或已有会话状态 |
 | 操作屏障与事件 | `runtime.py` | worker 暂停、恢复校验、结构化事件 | 从日志猜测任务状态、持久化业务对象 |
-| 平台采集 | `platform_worker.py`、`media_platform/*`、`store/*` | 原生登录、发现、读取、分页约束、原存储与脱敏 | 直接写公共任务表、另建公共下载队列 |
+| 平台采集 | `platform_worker.py`、`src/mediacrawler/platforms/*`、`src/mediacrawler/storage/stores/*` | 原生登录、发现、读取、分页约束、原存储与脱敏 | 直接写公共任务表、另建公共下载队列 |
 | 平台媒体解析 | `adapters/media.py`、`adapters/media_worker.py` | 当前内容的资源归属、清晰度选择、原始字段临时上下文 | 根据任意同页请求自动关联广告或其他帖子 |
 | 声明式网页采集 | `template_worker.py` | 现有会话中的网页视频 DOM 解析 | 任意 Python / JavaScript 执行 |
-| 课程内部执行模块 | `workers/browser-capture/src/workbench` | 迁入课程发现与播放捕获、结构化协议 | 独立 Node Web 服务、接管公共索引 |
+| 课程内部执行模块 | `src/browser-worker/src/workbench` | 迁入课程发现与播放捕获、结构化协议 | 独立 Node Web 服务、接管公共索引 |
 | 媒体机制 | `media/capture.py`、`media/identity.py`、`media/downloader.py` | 被动发现、稳定身份、媒体传输及合并机制 | 把网络候选当作已确认内容、绕过任务入队 |
-| 页面与交互 | `webui/src/workbench` | 配置、平台管理、工作区、预览、结果和操作反馈 | 连接 CDP、访问 SQLite、判定任务最终状态 |
+| 页面与交互 | `src/webui/src/workbench` | 配置、平台管理、工作区、预览、结果和操作反馈 | 连接 CDP、访问 SQLite、判定任务最终状态 |
 
 ## 四种 owner
 

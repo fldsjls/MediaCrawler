@@ -30,7 +30,7 @@ MASK_RE = re.compile(r"^.?\*{1,4}.?$")
 # ----------------------------- ORM 自省 -----------------------------
 
 def test_orm_has_no_forbidden_columns():
-    import database.models as m
+    import mediacrawler.storage.database.models as m
     from sqlalchemy.orm import class_mapper
     tables = [c for c in dir(m) if c[0].isupper()
               and c not in ("Base", "Column", "Integer", "BigInteger", "String", "Text")]
@@ -44,7 +44,7 @@ def test_orm_has_no_forbidden_columns():
 
 
 def test_creator_tables_removed():
-    import database.models as m
+    import mediacrawler.storage.database.models as m
     removed = {"XhsCreator", "DyCreator", "WeiboCreator", "TiebaCreator",
                "ZhihuCreator", "BilibiliUpInfo", "BilibiliContactInfo"}
     for t in removed:
@@ -52,7 +52,7 @@ def test_creator_tables_removed():
 
 
 def test_content_tables_have_creator_hash():
-    import database.models as m
+    import mediacrawler.storage.database.models as m
     from sqlalchemy.orm import class_mapper
     content_tables = ["XhsNote", "XhsNoteComment", "WeiboNote", "WeiboNoteComment",
                       "BilibiliVideo", "BilibiliVideoComment", "BilibiliUpDynamic",
@@ -84,7 +84,7 @@ def _check_nickname_masked(d: dict, raw: str, label: str):
 
 
 def test_mask_and_hash_tools():
-    from tools.user_hash import anonymize_user_id, mask_nickname
+    from mediacrawler.infrastructure.helpers.user_hash import anonymize_user_id, mask_nickname
     h = anonymize_user_id("12345")
     assert h and h != "12345" and re.fullmatch(r"[0-9a-f]{16}", h)
     assert anonymize_user_id(None) == "" and anonymize_user_id("") == ""
@@ -97,7 +97,7 @@ def test_mask_and_hash_tools():
 
 def test_xhs_note_extraction_masks_user_info():
     import asyncio
-    import store.xhs as xs
+    import mediacrawler.storage.stores.xhs as xs
     note_item = {
         "note_id": "abc",
         "type": "normal",
@@ -129,7 +129,7 @@ def test_xhs_note_extraction_masks_user_info():
 
 
 def test_tieba_note_extraction_masks_user_info():
-    from media_platform.tieba.help import TieBaExtractor
+    from mediacrawler.platforms.tieba.help import TieBaExtractor
     api_data = {
         "thread": {"id": 1, "title": "tt", "reply_num": 5},
         "first_floor": {"tid": 1, "author_id": 9, "time": 1700000000, "content": "c"},
@@ -145,8 +145,8 @@ def test_tieba_note_extraction_masks_user_info():
 
 
 def test_tieba_comment_extraction_masks_user_info():
-    from media_platform.tieba.help import TieBaExtractor
-    from model.m_baidu_tieba import TiebaNote
+    from mediacrawler.platforms.tieba.help import TieBaExtractor
+    from mediacrawler.platforms.models.m_baidu_tieba import TiebaNote
     api_data = {
         "forum": {"id": 1, "name": "test"},
         "post_list": [{"id": 7, "author_id": 9, "time": 1700000000, "content": "c", "sub_post_number": 0}],
@@ -161,8 +161,8 @@ def test_tieba_comment_extraction_masks_user_info():
 
 
 def test_zhihu_comment_extraction_masks_user_info():
-    from media_platform.zhihu.help import ZhihuExtractor
-    from model.m_zhihu import ZhihuContent
+    from mediacrawler.platforms.zhihu.help import ZhihuExtractor
+    from mediacrawler.platforms.models.m_zhihu import ZhihuContent
     comments_raw = [{
         "type": "comment", "id": 1, "content": "c", "created_time": 1700000000,
         "like_count": 1, "dislike_count": 0, "child_comment_count": 0,
@@ -181,7 +181,7 @@ def test_zhihu_comment_extraction_masks_user_info():
 def test_bilibili_video_dict_masks_user_info():
     # 直接测 store/bilibili/__init__.py 的拍平逻辑(不触发网络)
     import asyncio
-    from store.bilibili import update_bilibili_video
+    from mediacrawler.storage.stores.bilibili import update_bilibili_video
     video_item = {
         "View": {
             "aid": 100, "title": "t", "desc": "d", "pubdate": 1,
@@ -197,7 +197,7 @@ def test_bilibili_video_dict_masks_user_info():
         async def store_content(self, content_item):
             captured.update(content_item)
 
-    import store.bilibili as bs
+    import mediacrawler.storage.stores.bilibili as bs
     orig = bs.BiliStoreFactory.create_store
     bs.BiliStoreFactory.create_store = staticmethod(lambda: FakeStore())
     try:
@@ -214,9 +214,11 @@ def test_bilibili_video_dict_masks_user_info():
 
 def _store_source_matches(pattern):
     expression = re.compile(pattern)
+    sources = list((ROOT / 'src/mediacrawler/storage/stores').rglob('*.py'))
+    assert sources, 'Storage source scan must not pass against a missing directory'
     return '\n'.join(
         f'{path.relative_to(ROOT)}:{number}:{line}'
-        for path in (ROOT / 'store').rglob('*.py')
+        for path in sources
         for number, line in enumerate(path.read_text(encoding='utf-8').splitlines(), 1)
         if expression.search(line)
     )

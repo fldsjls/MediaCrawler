@@ -14,4 +14,4 @@
 | roadmap | 尚未完成的能力及验收门槛 | [路线图](roadmap.md) |
 | about | 来源、许可、作者与上游资料 | [关于](about/index.md) |
 
-旧根目录文档、workbench.md 和 workbench/* 链接继续可打开，并提示新位置。旧首页 CLI 正文迁入 [CLI 参考](guides/cli.md)。维护方式见[文档开发约定](development/documentation.md)。
+旧根目录文档、workbench.md 和 workbench/* 网址通过发布构建生成的 HTML 跳转保留，源码不再维护重复占位页。旧首页 CLI 正文迁入 [CLI 参考](guides/cli/index.md)。维护方式见[文档开发约定](development/documentation.md)。

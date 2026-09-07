@@ -5,9 +5,9 @@
 ## 检查入口
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check-workbench.ps1
-npm --prefix workers/browser-capture run check
-npm --prefix webui run build
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\validation\check-workbench.ps1
+npm --prefix src/browser-worker run check
+npm --prefix src/webui run build
 npm run docs:check
 npm run docs:build
 ```
@@ -32,6 +32,8 @@ npm run docs:build
 本次用户目标是人工接管至少 30 帧/秒、自动采集低刷新。必须在接入后的工作台实际通道持续测量，并检查最低分段、输入和生命周期；独立捕获实验达标不等于生产路径达标。
 
 记录日期、代码基线、Windows/浏览器环境、视口、页面样本、模式、测量时长和方法。分别报告实测帧率、输入响应测量、CPU/内存及降级情况。没测量就不填数字；目标值不能写成结果，不承诺固定 60 fps。
+
+视频测量必须同时记录 `requestVideoFrameCallback` 的回调次数和 `metadata.presentedFrames` 的增量。回调运行在主线程，可能跳过合成器已经处理的帧；单数回调不能称为实际显示帧率。`presentedFrames` 表示提交合成的帧数，也不证明物理显示器逐帧显示。另以各自统计时间戳计算源捕获、发送编码、接收解码的帧数增量；一秒滚动读数不能替代整段平均值。记录页面可见性、预热时间、逐秒分段、回调漏采、主线程长任务和测试自身负载。依据见 [requestVideoFrameCallback 文档](https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement/requestVideoFrameCallback)。
 
 本地页面证明传输输入，真实网站仍需登录、加载和输出验收。[RTC 本机测量](../history/2026-09-07-rtc-performance.md)和[后续路线比较](../history/2026-09-07-preview-route-comparison.md)分别记录时点结果。比较同一路径时保留后续回落数据，不能只取最佳一次；后续测试继续按日期存入[历史](../history/index.md)。
 

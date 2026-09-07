@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-import config
-from tools.cdp_browser import CDPBrowserManager
+import mediacrawler.config as config
+from mediacrawler.infrastructure.helpers.cdp_browser import CDPBrowserManager
 
 
 @pytest.mark.asyncio

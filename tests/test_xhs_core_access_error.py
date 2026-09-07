@@ -19,9 +19,9 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-import config
-from media_platform.xhs.core import XiaoHongShuCrawler
-from media_platform.xhs.exception import IPBlockError, PlatformAccessError
+import mediacrawler.config as config
+from mediacrawler.platforms.xhs.core import XiaoHongShuCrawler
+from mediacrawler.platforms.xhs.exception import IPBlockError, PlatformAccessError
 
 
 def make_crawler(xhs_client):
@@ -115,7 +115,7 @@ async def test_creator_flow_skips_blocked_creator(monkeypatch):
     crawler = make_crawler(xhs_client)
     crawler.batch_get_note_comments = AsyncMock()
     monkeypatch.setattr(
-        "media_platform.xhs.core.xhs_store.save_creator", AsyncMock(), raising=False
+        "mediacrawler.platforms.xhs.core.xhs_store.save_creator", AsyncMock(), raising=False
     )
 
     await crawler.get_creators_and_notes()

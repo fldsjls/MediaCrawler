@@ -9,9 +9,9 @@ from fastapi.testclient import TestClient
 import pytest
 from pydantic import ValidationError
 
-from api.workbench.repository import Repository
-from api.workbench.settings import BrowserSettings, SettingsRegistry
-from api.workbench.settings_router import create_settings_router
+from mediacrawler.workbench.repository import Repository
+from mediacrawler.workbench.settings import BrowserSettings, SettingsRegistry
+from mediacrawler.workbench.settings_router import create_settings_router
 
 
 @pytest.fixture

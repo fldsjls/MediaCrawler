@@ -5,9 +5,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from api.workbench.adapters.media import bilibili_playback, parse_media
-from api.workbench.adapters.media_worker import MediaCoordinator
-from api.workbench.runtime import Runtime
+from mediacrawler.workbench.adapters.media import bilibili_playback, parse_media
+from mediacrawler.workbench.adapters.media_worker import MediaCoordinator
+from mediacrawler.workbench.runtime import Runtime
 
 
 def test_bili_dash_selects_highest_video_and_audio_and_retains_segments():
@@ -117,10 +117,10 @@ async def test_bili_coordinator_uses_highest_request_and_one_resource_per_part()
 @pytest.mark.parametrize('platform', ['tieba', 'zhihu'])
 async def test_real_extractor_store_preserves_scoped_media_without_raw_author(platform, monkeypatch):
     import importlib
-    from var import source_keyword_var
+    from mediacrawler.common.context import source_keyword_var
     source_keyword_var.set('fixture')
-    store = importlib.import_module(f'store.{platform}')
-    helper = importlib.import_module(f'media_platform.{platform}.help')
+    store = importlib.import_module(f'mediacrawler.storage.stores.{platform}')
+    helper = importlib.import_module(f'mediacrawler.platforms.{platform}.help')
     cls = helper.TieBaExtractor if platform == 'tieba' else helper.ZhihuExtractor
     names = ['extract_note_detail_from_api'] if platform == 'tieba' else ['_extract_answer_content', '_extract_article_content', '_extract_zvideo_content']
     store_method = 'update_tieba_note' if platform == 'tieba' else 'update_zhihu_content'
@@ -153,8 +153,8 @@ async def test_real_extractor_store_preserves_scoped_media_without_raw_author(pl
 
 @pytest.mark.asyncio
 async def test_local_browser_fallback_scopes_content_and_obeys_pause(tmp_path):
-    from api.workbench.browser import BrowserSession
-    from api.workbench.models import SessionConfig
+    from mediacrawler.workbench.browser import BrowserSession
+    from mediacrawler.workbench.models import SessionConfig
     session = BrowserSession(SessionConfig(platform='generic'), tmp_path)
     runtime = Runtime()
     runtime.output = io.StringIO()
@@ -181,5 +181,14 @@ async def test_local_browser_fallback_scopes_content_and_obeys_pause(tmp_path):
         await page.locator('[data-aid="42"] video').evaluate('(v)=>v.src="blob:unresolved"')
         found = await media.browser_fallback(item, page.url)
         assert found.status == 'unresolved' and not found.videos
+        await page.locator('[data-aid="42"]').evaluate('''root => {
+            const next = document.createElement('video');
+            next.src = 'https://fixture.test/second.mp4';
+            root.append(next);
+        }''')
+        found = await media.browser_fallback(item, page.url)
+        assert [v['url'] for v in found.videos] == ['https://fixture.test/second.mp4']
+        assert found.videos[0]['logical_id'] == 'html:1'
+        assert found.unresolved_videos == ['html:0']
     finally:
         await session.close()

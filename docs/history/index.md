@@ -2,6 +2,8 @@
 
 > 文档类型：历史索引；每份记录只对指定日期、阶段和环境成立。
 
+- [2026-09-07 目录集中与界面验收](2026-09-07-layout-ui-validation.md)
+
 - [2026-09-07 平台媒体阶段](2026-09-07-platform-media-validation.md)
 - [2026-09-07 JPEG 预览阶段](2026-09-07-jpeg-preview.md)
 - [2026-09-07 文档重构验收](2026-09-07-documentation-restructure.md)

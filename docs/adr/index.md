@@ -8,3 +8,5 @@
 - [0004 原生标签页捕获与身份校验](0004-native-tab-capture.md)
 
 未完成目标进入[路线图](../roadmap.md)，执行证据进入[历史](../history/index.md)。
+
+- [0005 集中源码与本机文件](0005-consolidated-repository.md)

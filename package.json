@@ -1,13 +1,18 @@
 {
   "scripts": {
     "docs:dev": "vitepress dev docs --host 127.0.0.1",
-    "docs:build": "npm run docs:check && vitepress build docs",
+    "docs:build": "npm run docs:check && vitepress build docs && node scripts/build/docs-redirects.mjs",
     "docs:preview": "vitepress preview docs --host 127.0.0.1",
-    "docs:check": "node scripts/check-docs.mjs"
+    "docs:check": "node scripts/validation/check-docs.mjs",
+    "dev:web": "npm --prefix src/webui run dev",
+    "build:web": "npm --prefix src/webui run build",
+    "check:worker": "npm --prefix src/browser-worker run check",
+    "build": "npm run check:worker && npm run build:web && npm run docs:build"
   },
   "devDependencies": {
     "mermaid": "^11.12.2",
     "vitepress": "^1.3.4",
     "vitepress-plugin-mermaid": "^2.0.17"
-  }
+  },
+  "private": true
 }

@@ -2,8 +2,8 @@
 
 import pytest
 
-from media_platform.tieba.client import BaiduTieBaClient
-from model.m_baidu_tieba import TiebaComment, TiebaNote
+from mediacrawler.platforms.tieba.client import BaiduTieBaClient
+from mediacrawler.platforms.models.m_baidu_tieba import TiebaComment, TiebaNote
 
 
 class DummyPage:
@@ -102,7 +102,7 @@ async def test_creator_feed_walks_until_has_more_false(monkeypatch):
 
     client.get_notes_by_creator_portrait = fake_get_notes_by_creator_portrait
     client.get_note_by_id = fake_get_note_by_id
-    monkeypatch.setattr("media_platform.tieba.client.asyncio.sleep", fake_sleep)
+    monkeypatch.setattr("mediacrawler.platforms.tieba.client.asyncio.sleep", fake_sleep)
 
     notes = await client.get_all_notes_by_creator_url("tb.1.creator", crawl_interval=0)
 

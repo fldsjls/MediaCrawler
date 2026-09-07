@@ -9,3 +9,5 @@
 - [上游 CLI 架构](upstream-cli.md)
 
 操作进入[使用指南](../guides/index.md)，时点结果进入[历史](../history/index.md)，原因进入 [ADR](../adr/index.md)。
+
+- [目录与路径](repository-layout.md)

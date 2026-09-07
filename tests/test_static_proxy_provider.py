@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-import config
-from proxy.proxy_ip_pool import StaticProxyProvider, create_ip_pool
-from proxy.types import ProviderNameEnum
+import mediacrawler.config as config
+from mediacrawler.infrastructure.proxy.proxy_ip_pool import StaticProxyProvider, create_ip_pool
+from mediacrawler.infrastructure.proxy.types import ProviderNameEnum
 
 
 def test_default_proxy_provider_remains_existing_provider():
