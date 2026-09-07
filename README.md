@@ -1,4 +1,17 @@
-# 🔥 MediaCrawler - 自媒体平台爬虫 🕷️
+# MediaCrawler - 通用网站爬虫工作台
+
+## 本机统一采集工作台
+
+本分支以通用网站爬虫为核心，通过同一 FastAPI / React 工作台管理网站定义、内容采集、浏览器预览与人工接管、媒体捕获、下载队列和结果。内置平台、迁入课程能力与自定义网站共用任务流程；仅需从 MediaCrawler 目录安装与启动，无需运行旧项目。
+
+平台支持视频、书籍、购物、社区与图文、其他类型。类型只用于分类，执行能力由适配器或模板声明：书籍与购物本轮提供配置和预览，正文、商品与价格采集尚未实现。预览播放只发现资源，不自动下载；视频和图片独立选择。
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-workbench.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\start-workbench.ps1
+```
+
+打开 [本机工作台](http://127.0.0.1:8080)。见 [文档入口](docs/index.md)、[本机安装](docs/getting-started/local-setup.md)、[操作指南](docs/guides/index.md)、[职责边界](docs/architecture/layer-boundaries.md)、[开发与验收](docs/development/quality.md) 和 [历史记录](docs/history/index.md)。运行 `npm run docs:dev` 可浏览完整文档站，`npm run docs:build` 会先执行结构检查。原平台 CLI 和下方上游说明保留；本地样本通过不代表真实网站登录及输出已验收。
 
 <div align="center">
 

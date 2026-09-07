@@ -1,10 +1,50 @@
-/* .vitepress/theme/custom.css */
-/**
- * Component: Sidebar
- * -------------------------------------------------------------------------- */
-
+/* VitePress retains accessible navigation, local search and color-mode controls. */
 :root {
-  --vp-sidebar-width: 285px;
-  --vp-sidebar-bg-color: var(--vp-c-bg-alt);
-  --vp-aside-width: 300px;
+  --vp-c-brand-1: #256653;
+  --vp-c-brand-2: #347f69;
+  --vp-c-brand-3: #428f78;
+  --vp-c-brand-soft: rgba(46, 116, 91, .10);
+  --vp-c-bg: #fdfdfb;
+  --vp-c-bg-alt: #f5f6f2;
+  --vp-c-bg-soft: #f3f5f1;
+  --vp-c-text-1: #202d29;
+  --vp-font-family-base: 'Inter', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  --vp-font-family-mono: 'Cascadia Code', Consolas, monospace;
+  --vp-home-hero-name-color: var(--vp-c-text-1);
+  --vp-sidebar-width: 272px;
+  --vp-layout-max-width: 1440px;
 }
+.dark {
+  --vp-c-brand-1: #89d3b6;
+  --vp-c-brand-2: #76c6a7;
+  --vp-c-brand-3: #58ad8e;
+  --vp-c-brand-soft: rgba(137, 211, 182, .13);
+  --vp-c-bg: #171d1c;
+  --vp-c-bg-alt: #121817;
+  --vp-c-bg-soft: #202826;
+  --vp-c-text-1: #e0e9e3;
+}
+.VPNavBarTitle .title { letter-spacing: -.025em; }
+.VPHero .name { font-size: clamp(34px, 4.5vw, 58px); font-weight: 600; }
+.VPHero .text { font-size: clamp(30px, 3.5vw, 48px); line-height: 1.25; letter-spacing: -.04em; }
+.VPHero .tagline { max-width: 660px; font-size: 18px; line-height: 1.8; }
+.VPFeature { border: 1px solid var(--vp-c-divider); border-radius: 8px; }
+.VPButton { border-radius: 6px !important; }
+.vp-doc h1 { letter-spacing: -.03em; }
+.vp-doc h2 { padding-top: 24px; }
+.vp-doc p, .vp-doc li { line-height: 1.85; }
+.vp-doc table { width: 100%; display: block; overflow-x: auto; }
+.vp-doc th { white-space: nowrap; }
+.vp-doc blockquote { border-left-color: var(--vp-c-brand-2); font-size: 14px; }
+.docs-home-body { max-width: 1152px; margin: 36px auto 80px; padding: 0 32px; }
+.docs-home-body table { width: 100%; border-collapse: collapse; display: block; overflow-x: auto; }
+.docs-home-body th, .docs-home-body td { text-align: left; border-bottom: 1px solid var(--vp-c-divider); padding: 15px 18px; }
+.docs-home-body h2 { margin: 36px 0 18px; font-size: 24px; font-weight: 600; }
+.docs-home-body p { margin: 16px 0; line-height: 1.85; }
+.docs-home-body a { color: var(--vp-c-brand-1); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) {
+  .docs-home-body { padding: 0 24px; margin-top: 20px; }
+  .docs-home-body th, .docs-home-body td { min-width: 140px; padding: 12px; font-size: 14px; }
+  .VPHero .tagline { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }

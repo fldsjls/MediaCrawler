@@ -184,3 +184,8 @@ debug_tools
 
 database/*.db
 .omx/
+
+workers/browser-capture/node_modules/
+workers/browser-capture/storage/
+workers/browser-capture/logs/
+workers/browser-capture/tools/**/*.exe

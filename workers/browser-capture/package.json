@@ -1,0 +1,24 @@
+{
+  "name": "mediacrawler-browser-capture",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "start": "node --import tsx src/workbench/worker.ts",
+    "crawl:m3u8": "tsx src/sites/generic/m3u8/main.ts",
+    "crawl:m3u8:visual": "tsx src/sites/generic/m3u8/main.ts --headful --screenshots --red-boxes --record-video --limit 3",
+    "crawl:meishiwang": "tsx src/sites/meishiwang/main.ts",
+    "download:meishiwang": "tsx src/sites/meishiwang/download/downloadCli.ts",
+    "download:m3u8": "tsx src/downloader/m3u8.ts"
+  },
+  "dependencies": {
+    "crawlee": "^3.17.0",
+    "playwright": "^1.60.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^6.0.0"
+  }
+}

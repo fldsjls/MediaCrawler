@@ -155,10 +155,10 @@ export function CrawlerConfigPanel() {
   }
 
   return (
-    <div className="space-y-4 animate-slide-up">
-      {/* Row 1: Three Config Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Column 1: Target & Mode Section */}
+    <div className="flex min-h-0 flex-col gap-3 lg:h-full">
+      {/* Configuration sections share one independently scrollable column. */}
+      <div className="space-y-3 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain lg:pr-1">
+        {/* Target & Mode Section */}
         <Section
           title={t('section.targetMatrix.title')}
           description={t('section.targetMatrix.description')}
@@ -274,7 +274,7 @@ export function CrawlerConfigPanel() {
           )}
         </Section>
 
-        {/* Column 2: Authentication Section */}
+        {/* Authentication Section */}
         <Section
           title={t('section.authMatrix.title')}
           description={t('section.authMatrix.description')}
@@ -318,7 +318,7 @@ export function CrawlerConfigPanel() {
           ) : null}
         </Section>
 
-        {/* Column 3: Output & Runtime Section */}
+        {/* Output & Runtime Section */}
         <Section
           title={t('section.outputConfig.title')}
           description={t('section.outputConfig.description')}
@@ -388,8 +388,8 @@ export function CrawlerConfigPanel() {
         </Section>
       </div>
 
-      {/* Row 2: Start/Stop Button - Full Width */}
-      <div className="w-full">
+      {/* Actions stay visible below the scrolling configuration. */}
+      <div className="w-full shrink-0">
         {isRunning ? (
           <Button
             onClick={handleStop}

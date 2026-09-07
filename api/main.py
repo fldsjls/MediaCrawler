@@ -18,8 +18,8 @@
 
 """
 MediaCrawler WebUI API Server
-Start command: uvicorn api.main:app --port 8080 --reload
-Or: python -m api.main
+Local workbench: python scripts/start-workbench.py
+Keep the Windows Proactor loop; do not use reload or multiple workers.
 """
 import asyncio
 import os
@@ -33,6 +33,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from .routers import crawler_router, data_router, websocket_router
+from .workbench.router import router as workbench_router, startup, shutdown, allowed
+from fastapi.responses import JSONResponse
 
 # Project root directory (used for running subprocesses like uv run main.py)
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -64,6 +66,15 @@ app.add_middleware(
 app.include_router(crawler_router, prefix="/api")
 app.include_router(data_router, prefix="/api")
 app.include_router(websocket_router, prefix="/api")
+app.include_router(workbench_router, prefix="/api")
+app.add_event_handler('startup', startup)
+app.add_event_handler('shutdown', shutdown)
+
+@app.middleware('http')
+async def local_access(request, call_next):
+    if not allowed(request.headers):
+        return JSONResponse({'detail': '工作台仅接受本机来源'}, status_code=403)
+    return await call_next(request)
 
 
 @app.get("/")
@@ -202,4 +213,4 @@ if os.path.exists(WEBUI_DIR):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="127.0.0.1", port=8080)

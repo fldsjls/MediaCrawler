@@ -6,10 +6,9 @@
 1. ORM 自省 —— database.models 中无禁用列、creator 档案表已删除、内容/评论表含 creator_hash。
 2. 提取层 —— 用 mock API/HTML payload 喂各平台提取器，断言输出 dict 不含禁用字段、
    不含原始 user_id、昵称已脱敏且不等于原文。
-3. 仓库 grep 断言 —— store/ 与 media_platform/ 不再把禁用字段作为存储 dict 的 key。
+3. 跨平台源码断言 —— store/ 不再把禁用字段作为存储 dict 的 key。
 """
 import re
-import subprocess
 import pathlib
 
 import pytest
@@ -211,28 +210,29 @@ def test_bilibili_video_dict_masks_user_info():
     _check_nickname_masked(captured, "UP主大人", "bili_video")
 
 
-# ----------------------------- 仓库 grep 断言 -----------------------------
+# ----------------------------- 跨平台仓库源码断言 -----------------------------
+
+def _store_source_matches(pattern):
+    expression = re.compile(pattern)
+    return '\n'.join(
+        f'{path.relative_to(ROOT)}:{number}:{line}'
+        for path in (ROOT / 'store').rglob('*.py')
+        for number, line in enumerate(path.read_text(encoding='utf-8').splitlines(), 1)
+        if expression.search(line)
+    )
 
 def test_store_no_forbidden_dict_keys():
     # store/ 下不得把禁用字段作为存储 dict 的 key("field": value 形式)
-    out = subprocess.run(
-        ["grep", "-rnE", '"(' + "|".join(FORBIDDEN_KEYS) + r')"\s*:', str(ROOT / "store")],
-        capture_output=True, text=True,
-    )
+    matches = _store_source_matches('"(' + "|".join(FORBIDDEN_KEYS) + r')"\s*:')
     # 允许的例外：Mongo store_creator 里的 query={"user_id": ...} 已全部改为 pass，应为空
-    assert out.stdout.strip() == "", f"store/ 仍写入禁用字段键:\n{out.stdout}"
+    assert matches == "", f"store/ 仍写入禁用字段键:\n{matches}"
 
 
 def test_store_no_creator_orm_imports():
     # 已删除的 creator ORM 表(XhsCreator/DyCreator/...)不得再从 database.models 导入。
     # 注意:model/m_*.py 里的同名 pydantic 类是内存类型，允许保留。
-    out = subprocess.run(
-        ["grep", "-rnE",
-         r"from database\.models import.*(XhsCreator|DyCreator|WeiboCreator|TiebaCreator|ZhihuCreator|BilibiliUpInfo|BilibiliContactInfo)",
-         str(ROOT / "store")],
-        capture_output=True, text=True,
-    )
-    assert out.stdout.strip() == "", f"store/ 仍 import 已删除的 creator ORM 表:\n{out.stdout}"
+    matches = _store_source_matches(r"from database\.models import.*(XhsCreator|DyCreator|WeiboCreator|TiebaCreator|ZhihuCreator|BilibiliUpInfo|BilibiliContactInfo)")
+    assert matches == "", f"store/ 仍 import 已删除的 creator ORM 表:\n{matches}"
 
 
 if __name__ == "__main__":

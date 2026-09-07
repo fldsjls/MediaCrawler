@@ -1,0 +1,19 @@
+{
+  "ffmpeg": {
+    "release": "BtbN autobuild-2026-09-06-13-06 / N-126435-gf93cd72dde",
+    "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-09-06-13-06/ffmpeg-N-126435-gf93cd72dde-win64-gpl.zip",
+    "sha256": "cd75d5135fdd98f386043607179f4d5d471dee1707dc63509e292dff170586f3",
+    "files": {
+      "ffmpeg.exe": ["c27ad396acf3f38d96231f0830ca90adb4743ed9bf39a61456d3bb0bb4f6f902", "5f0118f94a7e92d01a86ea07ed533dee9cb45789d135a4365e98cefec3ca8847"],
+      "ffprobe.exe": ["047e5437f38d73cb9b2976cb0bbdcf6956964cea2fdd38978d0a2c09682d6e61", "c845a650062e6c774db15a1ab6393b945768097db405a6dc88ab73f344331520"]
+    }
+  },
+  "n-m3u8dl-re": {
+    "release": "nilaoda N_m3u8DL-RE v0.5.1-beta / c1f6db5639397dde362c31b31eebd88c796c90da",
+    "url": "https://github.com/nilaoda/N_m3u8DL-RE/releases/download/v0.5.1-beta/N_m3u8DL-RE_v0.5.1-beta_win-x64_20251029.zip",
+    "sha256": "7e2e5e64c2893aef118febc2213cd43706fce8bd0ffd5e8dd94024d79ea365e9",
+    "files": {
+      "N_m3u8DL-RE.exe": ["a2100bd7b1829858e5c1388b427a93c3a5afcf81288450d2e38a587c246647e3"]
+    }
+  }
+}

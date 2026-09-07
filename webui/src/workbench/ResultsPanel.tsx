@@ -1,0 +1,32 @@
+import { useEffect, useMemo, useState } from 'react'
+import { Download, Search, Video } from 'lucide-react'
+import { Resource, Results, fileUrl, states } from './api'
+const resourceStates: Record<string, string> = { discovered: '可下载', pending: '等待下载', running: '下载中', succeeded: '已下载', failed: '下载失败', unavailable: '暂不可下载' }
+const downloadable = (r: Resource) => ['discovered', 'failed'].includes(r.state)
+const bytes = (size?: number) => size ? size >= 1048576 ? `${(size / 1048576).toFixed(1)} MB` : `${Math.round(size / 1024)} KB` : '大小未知'
+interface Props { results: Results; taskId?: string; onExport: () => void; resources?: Resource[]; sessionId?: string; busy?: boolean; onDownload?: (ids: string[]) => void; resourceStatus?: string }
+export function ResultsPanel({ results, taskId, onExport, resources = [], sessionId, busy = false, onDownload, resourceStatus }: Props) {
+ const [view, setView] = useState('videos'), [query, setQuery] = useState(''), [filter, setFilter] = useState('all'), [selected, setSelected] = useState<string[]>([])
+ const failed = results.records.filter(r => r.kind === 'failure')
+ const videos = useMemo(() => resources.filter(r => r.kind === 'video'), [resources])
+ const filtered = videos.filter(r => (!query || `${r.title} ${r.format || ''} ${r.quality || ''} ${r.page_url || ''}`.toLowerCase().includes(query.toLowerCase())) && (filter === 'all' || filter === 'available' && downloadable(r) || filter === r.state))
+ const eligible = filtered.filter(downloadable), selection = selected.filter(id => videos.some(r => r.id === id && downloadable(r)))
+ useEffect(() => { setSelected([]) }, [taskId, sessionId])
+ const toggle = (id: string) => setSelected(old => old.includes(id) ? old.filter(value => value !== id) : [...old, id])
+ const requestDownload = (ids: string[]) => { if (ids.length && onDownload) onDownload(ids) }
+ const tabs = [['videos', `视频 ${videos.length}`], ['content', `内容 ${results.records.filter(r => r.kind === 'content').length}`], ['comments', '评论'], ['files', `文件 ${results.files.length}`], ['failures', `失败项 ${failed.length + results.files.filter(f => f.state === 'failed').length}`]]
+ return <div className="wb-results">
+  <div className="wb-panel-tools"><div className="wb-tabs" role="tablist" aria-label="结果分类">{tabs.map(([id, title]) => <button key={id} role="tab" aria-selected={view === id} onClick={() => setView(id)}>{title}</button>)}</div><button disabled={!taskId} onClick={onExport}>导出</button></div>
+  {view === 'videos' && <>
+   <div className="wb-resource-filters"><label className="wb-resource-search"><Search size={16} /><input aria-label="筛选视频" value={query} onChange={e => setQuery(e.target.value)} placeholder="搜索标题、格式或清晰度" /></label><select aria-label="视频状态" value={filter} onChange={e => setFilter(e.target.value)}><option value="all">全部状态</option><option value="available">可下载 / 可重试</option><option value="pending">等待下载</option><option value="running">下载中</option><option value="succeeded">已下载</option><option value="unavailable">暂不可下载</option></select></div>
+   <div className="wb-resource-actions"><label className="wb-check"><input type="checkbox" aria-label="选择当前可下载视频" checked={eligible.length > 0 && eligible.every(r => selection.includes(r.id))} disabled={!eligible.length || busy} onChange={e => setSelected(old => e.target.checked ? [...new Set([...old, ...eligible.map(r => r.id)])] : old.filter(id => !eligible.some(r => r.id === id)))} />全选可下载</label><span>{selection.length ? `已选 ${selection.length} 项` : `${filtered.length} 个视频`}</span><button className="wb-primary" disabled={busy || !selection.length || !onDownload} onClick={() => requestDownload(selection)}><Download size={15} />下载所选{selection.length ? ` (${selection.length})` : ''}</button></div>
+  </>}
+  <div className="wb-result-scroll">
+   {view === 'videos' && <>{filtered.length ? <div className="wb-resource-list" aria-label="发现的视频">{filtered.map(r => <article className="wb-resource-row" key={r.id}><input type="checkbox" aria-label={`选择视频 ${r.title || r.id}`} checked={selection.includes(r.id)} disabled={busy || !downloadable(r)} onChange={() => toggle(r.id)} /><div className="wb-resource-info"><strong>{r.title || '未命名视频'}</strong><p>{[r.format?.toUpperCase(), r.quality || (r.width && r.height ? `${r.width} × ${r.height}` : ''), bytes(r.size)].filter(Boolean).join(' · ')}</p><small>{r.origin === 'adapter' ? '平台解析' : '浏览器发现'}{r.page_url && <> · <a href={r.page_url} target="_blank" rel="noreferrer" title={r.page_url}>来源页面</a></>}</small>{r.error && <p className="wb-resource-error">{r.error}</p>}</div><span className={`wb-state ${r.state}`}>{resourceStates[r.state] || r.state}</span><button aria-label={`下载视频 ${r.title || r.id}`} disabled={busy || !downloadable(r) || !onDownload} onClick={() => requestDownload([r.id])}><Download size={15} /><span>下载</span></button></article>)}</div> : <div className="wb-resource-empty"><Video size={26} /><h3>{videos.length ? '没有匹配的视频' : '尚未发现视频'}</h3><p>{videos.length ? '尝试其他关键词或状态。' : '打开网站并播放视频，或开始采集后，发现的视频会列在这里。打开网站不会自动下载。'}</p>{resourceStatus && <small>{resourceStatus}</small>}</div>}</>}
+   {(view === 'content' || view === 'comments') && <>{!taskId && <p className="wb-muted">采集后的内容记录和评论会逐条保存在这里。</p>}{results.records.filter(r => view === 'content' ? ['content', 'creator'].includes(r.kind) : r.kind === 'comment').map(r => { const videoStatus = r.fields && typeof r.fields === 'object' && 'video_status' in r.fields ? String(r.fields.video_status) : ''; return <details key={r.id} className="wb-record"><summary>{r.title || r.id}<small>{r.id}{videoStatus ? ` · ${{ none: '无视频', available: '有可用视频', unresolved: '视频待解析' }[videoStatus] || videoStatus}` : ''}</small></summary><pre>{JSON.stringify(r.fields || r, null, 2)}</pre></details> })}</>}
+   {(view === 'files' || view === 'failures') && results.files.filter(f => view === 'files' || f.state === 'failed').map(f => <div className="wb-record" key={f.id}><strong>{f.title}</strong><span className={`wb-state ${f.state}`}>{states[f.state] || f.state}</span>{f.size !== undefined && <small>{bytes(f.size)}</small>}{f.path && taskId && <a href={fileUrl(taskId, f.path)}>下载文件</a>}{f.error && <p role="status">{f.error}</p>}</div>)}
+   {view === 'failures' && failed.map(r => <div className="wb-record failed" key={r.id}>{r.title}<small>{r.target}</small></div>)}
+  </div>
+  {taskId && results.exports.length > 0 && <div className="wb-panel-tools"><span>导出文件</span>{results.exports.map(path => <a key={path} href={fileUrl(taskId, path)}>{path}</a>)}</div>}
+ </div>
+}

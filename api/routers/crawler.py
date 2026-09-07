@@ -19,7 +19,7 @@
 from fastapi import APIRouter, HTTPException
 
 from ..schemas import CrawlerStartRequest, CrawlerStatusResponse
-from ..services import crawler_manager
+from ..workbench.compat import crawler_manager
 
 router = APIRouter(prefix="/crawler", tags=["crawler"])
 
@@ -27,7 +27,10 @@ router = APIRouter(prefix="/crawler", tags=["crawler"])
 @router.post("/start")
 async def start_crawler(request: CrawlerStartRequest):
     """Start crawler task"""
-    success = await crawler_manager.start(request)
+    try:
+        success = await crawler_manager.start(request)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
     if not success:
         # Handle concurrent/duplicate requests: if process is already running, return 400 instead of 500
         if crawler_manager.process and crawler_manager.process.poll() is None:

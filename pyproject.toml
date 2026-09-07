@@ -40,6 +40,8 @@ dependencies = [
     "websockets>=15.0.1",
     "asyncpg>=0.31.0",
     "xhshow>=0.2.0",
+    "aiortc>=1.14,<2",
+    "av>=14,<17",
 ]
 
 [[tool.uv.index]]

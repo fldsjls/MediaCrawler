@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { Toaster } from 'sonner'
 import { Sidebar } from '@/components/layout/Sidebar'
-import { MainContent } from '@/components/layout/MainContent'
-import { AuthorFooter } from '@/components/layout/AuthorFooter'
-import { CrawlerConfigPanel } from '@/components/config/CrawlerConfigPanel'
+import { Workbench } from '@/workbench/Workbench'
 import { EnvironmentCheck, isEnvChecked } from '@/components/env/EnvironmentCheck'
 import { LicenseDisclaimer, isLicenseAccepted } from '@/components/license/LicenseDisclaimer'
 
@@ -14,6 +12,7 @@ function App() {
   const [envChecked, setEnvChecked] = useState(() => isEnvChecked())
   // State for showing disclaimer manually
   const [showDisclaimer, setShowDisclaimer] = useState(false)
+  const [connection, setConnection] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
 
   const handleEnvCheckComplete = () => {
     setEnvChecked(true)
@@ -29,7 +28,7 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen cyber-grid overflow-hidden relative">
+    <div className="flex flex-col h-dvh overflow-hidden relative">
       {/* License Disclaimer Modal - Shows first or when triggered */}
       {(!licenseAccepted || showDisclaimer) && (
         <LicenseDisclaimer onAccept={handleLicenseAccept} />
@@ -41,29 +40,21 @@ function App() {
       )}
 
       {/* Header Bar */}
-      <Sidebar onShowDisclaimer={handleShowDisclaimer} />
+      <Sidebar onShowDisclaimer={handleShowDisclaimer} connection={connection} />
 
       {/* Main Area */}
-      <div className="flex-1 flex flex-col gap-4 p-4 overflow-hidden min-h-0">
-        {/* Config Panel - Primary Action Area (Always Expanded) */}
-        <div className="flex-shrink-0">
-          <CrawlerConfigPanel />
-        </div>
-
-        {/* Console - Collapsible Terminal */}
-        <MainContent />
-      </div>
+      <Workbench onConnectionChange={setConnection} />
 
       {/* Author Footer */}
-      <AuthorFooter />
+
 
       {/* Toast notifications - Theme-aware style */}
       <Toaster
         position="top-right"
         toastOptions={{
-          className: 'glass-panel font-mono text-cyber-text-primary',
+          className: 'glass-panel text-cyber-text-primary',
           style: {
-            fontFamily: 'JetBrains Mono, monospace',
+            fontFamily: 'Segoe UI, Microsoft YaHei UI, sans-serif',
           },
         }}
       />

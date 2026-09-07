@@ -26,8 +26,8 @@ export function Terminal() {
   return (
     <div className={`flex flex-col rounded-lg overflow-hidden transition-all duration-300 border border-cyber-border-subtle bg-[#0d1117] ${isCollapsed ? 'h-12' : 'h-full'}`}>
       {/* Terminal Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-[#161b22] border-b border-[#30363d] flex-shrink-0">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 bg-[#161b22] border-b border-[#30363d] flex-shrink-0">
+        <div className="flex items-center gap-2">
           {/* Window buttons */}
           <div className="flex gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-cyber-neon-pink/80" />
@@ -39,7 +39,7 @@ export function Terminal() {
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Log count & status */}
           <div className="flex items-center gap-3 text-xs font-mono">
             <span className="text-[#8b949e]">{t('header.entries', { count: logs.length })}</span>
