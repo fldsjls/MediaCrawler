@@ -9,6 +9,16 @@ from typing import Protocol, Any
 from pydantic import BaseModel, Field
 
 
+class BookRecord(BaseModel):
+    book_id: str
+    title: str
+    author: str = ''
+    chapter_id: str = ''
+    chapter_title: str = ''
+    source_url: str
+    fields: dict[str, Any] = Field(default_factory=dict)
+
+
 class ProductRecord(BaseModel):
     product_id: str
     sku_id: str = ''

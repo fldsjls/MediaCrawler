@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from mediacrawler.workbench.browser import BrowserSession, kill_tree
-from mediacrawler.workbench.models import SessionConfig, TaskConfig
+from mediacrawler.workbench.workflows.legacy_models import SessionConfig, TaskConfig
 
 
 FIXTURE = r'''
@@ -91,7 +91,7 @@ def imports(name, *args, **kwargs):
         return module
     return original_import(name, *args, **kwargs)
 importlib.import_module = imports
-from mediacrawler.workbench import platform_worker
+from mediacrawler.workbench.platforms import worker as platform_worker
 class CapturedRuntime(platform_worker.Runtime):
     def __init__(self):
         super().__init__()

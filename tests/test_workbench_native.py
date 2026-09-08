@@ -7,9 +7,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from mediacrawler.workbench.preview.internal import is_internal_preview_url, public_pages
-from mediacrawler.workbench.preview.native import NativeRTCStreams, SenderServer
-from mediacrawler.workbench.preview import native as native_module
+from mediacrawler.workbench.browser.preview.internal import is_internal_preview_url, public_pages
+from mediacrawler.workbench.browser.preview.native import NativeRTCStreams, SenderServer
+from mediacrawler.workbench.browser.preview import native as native_module
 
 
 def test_internal_pages_are_not_collection_targets():

@@ -12,7 +12,7 @@ from mediacrawler.api.routers import crawler as legacy_router
 from mediacrawler.api.services.crawler_manager import CrawlerManager
 from mediacrawler.workbench import router as workbench_router
 from mediacrawler.workbench.compat import LegacyTaskFacade
-from mediacrawler.workbench.service import Workbench
+from mediacrawler.workbench.workflows.service import Workbench
 
 
 @pytest.fixture
@@ -128,7 +128,7 @@ def test_platform_management_declares_categories_and_templates(local_api):
 
 
 def test_passive_resource_channel_does_not_create_task_or_leak_credentials(local_api):
-    from mediacrawler.workbench.media.capture import MediaCapture
+    from mediacrawler.workbench.browser.capture import MediaCapture
     session = register_session(local_api)
     session.media = MediaCapture(session.id)
     resource = session.media.add({'url': 'http://127.0.0.1/video.mp4?token=PRIVATE',

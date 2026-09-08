@@ -5,10 +5,10 @@ import pytest
 from pydantic import ValidationError
 
 from mediacrawler.workbench.browser import BrowserSession
-from mediacrawler.workbench.models import SessionConfig, TaskConfig
+from mediacrawler.workbench.workflows.legacy_models import SessionConfig, TaskConfig
 from mediacrawler.workbench.platforms.registry import PlatformDefinition, PlatformRegistry
-from mediacrawler.workbench.repository import Repository
-from mediacrawler.workbench.service import Workbench
+from mediacrawler.workbench.persistence.repository import Repository
+from mediacrawler.workbench.workflows.service import Workbench
 
 
 def test_platform_categories_are_not_executable_capabilities(tmp_path):
@@ -17,7 +17,7 @@ def test_platform_categories_are_not_executable_capabilities(tmp_path):
         registry = PlatformRegistry(repo)
         books = registry.save(PlatformDefinition(name='本地书籍站', category='books', url='http://127.0.0.1:8091', template='preview_only'))
         assert books['category'] == 'books' and not books['collect']
-        assert 'generic' not in {p['id'] for p in registry.list()}
+        assert 'generic' in {p['id'] for p in registry.list()}
         assert registry.get('meishiwang')['name'] == '美石建工'
         assert all(p['video'] for p in registry.list() if p['builtin'])
         updated = registry.save(PlatformDefinition(name='本地演示视频', category='video', url=books['url'],
@@ -50,7 +50,7 @@ def test_registry_and_v2_backup_survive_restart(tmp_path):
     repo = Repository(tmp_path)
     definition = PlatformRegistry(repo).save(PlatformDefinition(name='商城预览', category='shopping', url='https://example.com'))
     repo.db.close()
-    assert len(list((tmp_path / 'backups').glob('index-before-v2-*.sqlite3'))) == 1
+    assert len(list((tmp_path / 'backups').glob('index-before-v4-*.sqlite3'))) == 1
     reopened = Repository(tmp_path)
     try:
         assert PlatformRegistry(reopened).get(definition['id'])['name'] == '商城预览'

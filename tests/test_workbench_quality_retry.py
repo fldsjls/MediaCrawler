@@ -4,10 +4,10 @@ from types import SimpleNamespace
 
 import pytest
 
-from mediacrawler.workbench.media.capture import MediaCapture
-from mediacrawler.workbench.media.identity import logical_resource_identity, resource_identity
-from mediacrawler.workbench.models import TaskConfig
-from mediacrawler.workbench.service import TaskRun, Workbench
+from mediacrawler.workbench.browser.capture import MediaCapture
+from mediacrawler.workbench.downloads.identity import logical_resource_identity, resource_identity
+from mediacrawler.workbench.workflows.legacy_models import TaskConfig
+from mediacrawler.workbench.workflows.service import TaskRun, Workbench
 
 
 @pytest.mark.asyncio

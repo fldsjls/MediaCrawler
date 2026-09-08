@@ -8,7 +8,14 @@
 src/
   mediacrawler/
     api/               HTTP / WebSocket 入口
-    workbench/         任务、会话、设置、资源队列和结果编排
+    workbench/
+      workflows/       方案、步骤、校验、运行与统一调度
+      settings/        默认设置、工具配置、解析与设置接口
+      browser/         会话、预览、输入与资源捕获
+      downloads/       HTTP、FFmpeg、N_m3u8DL-RE 和公共传输
+      results/         产物索引、导出与分页预览
+      persistence/     SQLite、迁移与资料归档
+      platforms/       平台能力、worker 和适配桥接
     platforms/         平台采集器、平台字段和常量
     storage/           database 数据库机制、stores 平台存储适配
     infrastructure/    cache、proxy、helpers 浏览器及传输机制
@@ -16,7 +23,13 @@ src/
     config/            配置定义和默认值
     resources/js/      随包提供的运行资源
     cli/               命令行入口
-  webui/               React 页面、组件、样式
+  webui/src/workbench/
+    workflows/         卡片、编辑弹窗和方案草稿
+    runs/              任务中心与运行详情
+    browser/           浏览器工作区
+    results/           发现资源、任务产物与共用预览
+    settings/          设置页面
+    shared/            弹窗和溢出提示
   browser-worker/      Node 课程和网页执行模块
 scripts/
   setup/               安装、环境和下载工具检查

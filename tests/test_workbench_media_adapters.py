@@ -5,9 +5,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from mediacrawler.workbench.adapters.media import bilibili_playback, parse_media
-from mediacrawler.workbench.adapters.media_worker import MediaCoordinator
-from mediacrawler.workbench.runtime import Runtime
+from mediacrawler.workbench.platforms.adapters.media import bilibili_playback, parse_media
+from mediacrawler.workbench.platforms.adapters.media_worker import MediaCoordinator
+from mediacrawler.workbench.workflows.runtime import Runtime
 
 
 def test_bili_dash_selects_highest_video_and_audio_and_retains_segments():
@@ -154,7 +154,7 @@ async def test_real_extractor_store_preserves_scoped_media_without_raw_author(pl
 @pytest.mark.asyncio
 async def test_local_browser_fallback_scopes_content_and_obeys_pause(tmp_path):
     from mediacrawler.workbench.browser import BrowserSession
-    from mediacrawler.workbench.models import SessionConfig
+    from mediacrawler.workbench.workflows.legacy_models import SessionConfig
     session = BrowserSession(SessionConfig(platform='generic'), tmp_path)
     runtime = Runtime()
     runtime.output = io.StringIO()

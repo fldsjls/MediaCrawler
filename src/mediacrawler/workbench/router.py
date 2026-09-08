@@ -3,18 +3,49 @@ import secrets
 from typing import Literal
 from urllib.parse import urlparse
 from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-from .models import Control, PLATFORMS, SessionConfig, TaskConfig, TERMINAL
-from .service import Workbench
+from mediacrawler.workbench.workflows.legacy_models import Control, PLATFORMS, SessionConfig, TaskConfig, TERMINAL
+from mediacrawler.workbench.workflows.service import Workbench
 from .platforms.catalog import PLATFORM_TYPES, TEMPLATES
 from .platforms.registry import PlatformDefinition
-from .settings_router import create_settings_router
+from mediacrawler.workbench.settings.router import create_settings_router
 
 router = APIRouter()
 service: Workbench | None = None
 router.include_router(create_settings_router(lambda: service.repo))
+from .workflows.router import create_workflow_router
+router.include_router(create_workflow_router(lambda: service))
+
+
+@router.get('/browser-sessions/{session_id}/resources/{resource_id}/preview')
+async def preview_resource(session_id: str, resource_id: str, request: Request):
+    from contextlib import AsyncExitStack
+    from types import SimpleNamespace
+    import httpx
+    from mediacrawler.workbench.downloads.downloader import scoped_request
+    value = session(session_id)
+    item = value.media.get(resource_id)
+    if not item or item.get('state') == 'unavailable': raise HTTPException(404, '资源已失效')
+    if item.get('format') in ('hls', 'dash', 'segments', 'm4s') or item.get('streams') or item.get('segments'):
+        raise HTTPException(409, '此资源需要合并，请下载后预览')
+    stack = AsyncExitStack()
+    try:
+        client = await stack.enter_async_context(httpx.AsyncClient(timeout=30, trust_env=False))
+        response, _ = await stack.enter_async_context(scoped_request(client, SimpleNamespace(session=value, cancelled=False), item, item['url'], {'range': request.headers['range']} if request.headers.get('range') else {}))
+        mime = response.headers.get('content-type', '').split(';')[0]
+        if not mime.startswith(('video/', 'audio/', 'image/')) or mime == 'image/svg+xml':
+            await stack.aclose(); raise HTTPException(415, '此格式请下载后预览')
+        async def body():
+            try:
+                async for block in response.aiter_bytes(): yield block
+            finally: await stack.aclose()
+        return StreamingResponse(body(), status_code=response.status_code, media_type=mime,
+                                 headers={**{k:v for k,v in response.headers.items() if k in ('content-length','content-range','accept-ranges')}, 'X-Content-Type-Options':'nosniff'})
+    except HTTPException: raise
+    except Exception:
+        await stack.aclose(); raise HTTPException(409, '资源无法预览，请刷新来源页面或下载后查看')
 ALLOWED_ORIGINS = {f'http://{host}:{port}' for host in ('localhost', '127.0.0.1', '[::1]') for port in (8080, 5173)}
 
 def allowed(headers):
@@ -339,7 +370,7 @@ class ImportConfig(BaseModel):
 
 @router.post('/imports')
 async def import_data(config: ImportConfig):
-    from .migration import import_files
+    from mediacrawler.workbench.persistence.migration import import_files
     try:
         service.platforms.get(config.platform)
         known = {p['id'] for p in service.platforms.list(True)} | {'generic'}

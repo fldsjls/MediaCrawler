@@ -10,7 +10,7 @@ from PIL import Image
 from playwright.async_api import async_playwright
 
 from mediacrawler.workbench.browser import BrowserSession
-from mediacrawler.workbench.models import SessionConfig
+from mediacrawler.workbench.workflows.legacy_models import SessionConfig
 
 
 @pytest.mark.asyncio

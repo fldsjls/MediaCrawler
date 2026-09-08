@@ -1,6 +1,6 @@
 # 浏览器工作区与双模式传输
 
-> 文档类型：当前架构；依据 `preview/native.py`、`preview/native_sender.js`、`preview/internal.py`、`preview/viewport.py`、`preview/frames.py`、`browser.py` 与 `useBrowserPresentation.ts`。生产性能与真实网站验收另行记录。
+> 文档类型：当前架构；依据 `browser/preview/native.py`、`browser/preview/native_sender.js`、`browser/preview/internal.py`、`browser/preview/viewport.py`、`browser/preview/frames.py`、`browser/__init__.py` 与 `useBrowserPresentation.ts`。生产性能与真实网站验收另行记录。
 
 ## 同一会话
 
@@ -8,7 +8,7 @@
 
 画面是远程浏览器投影。输入走受控协议，固定视口与前端缩放分开，按实际显示区域换算坐标。
 
-`preview/viewport.py` 对齐真实浏览器内容区与输入坐标。原生捕获提示条会占用物理窗口，单靠 CDP 虚拟视口可能让 DOM 声称 1280×720、实际捕获却更小。该模块清除本通道的尺寸覆盖，根据实测内容区和外窗差值调整所属窗口。发送端核对实际轨道尺寸；后续尺寸变化先暂停传输，在有界时间内重新对齐并核对身份，不能恢复才关闭实时路径并明确降级，不拉伸错误画面掩盖偏移。
+`browser/preview/viewport.py` 对齐真实浏览器内容区与输入坐标。原生捕获提示条会占用物理窗口，单靠 CDP 虚拟视口可能让 DOM 声称 1280×720、实际捕获却更小。该模块清除本通道的尺寸覆盖，根据实测内容区和外窗差值调整所属窗口。发送端核对实际轨道尺寸；后续尺寸变化先暂停传输，在有界时间内重新对齐并核对身份，不能恢复才关闭实时路径并明确降级，不拉伸错误画面掩盖偏移。
 
 ## 通道与生命周期
 
@@ -24,7 +24,7 @@
 
 导航使原身份失效时暂停轨道，后端重新配置并核对同一目标；复核失败则关闭对应实时连接，让前端显示降级。切换页面释放旧捕获，按新的页面重新协商。辅助页从公开页面列表、媒体候选及 Python 平台、Python 模板、Node 课程三个 worker 的目标选择中排除。
 
-低刷新路径由 `FrameHub` 管理每个浏览器的单个 JPEG 生产者，订阅只保留最新帧，最后一个订阅离开时停止。截图服务通过 WebSocket 返回 JPEG；`preview/cdp.py` 保留独立 CDP 画面能力与截图后备。旧 `preview/rtc.py` 的 Python 视频转码实现保留用于回归对照，当前 `BrowserSession` 实时入口使用 `NativeRTCStreams`。两条路径均不配置外部 STUN/TURN，面向本机环境。输入继续使用独立的 Playwright 控制连接。
+低刷新路径由 `FrameHub` 管理每个浏览器的单个 JPEG 生产者，订阅只保留最新帧，最后一个订阅离开时停止。截图服务通过 WebSocket 返回 JPEG；`browser/preview/cdp.py` 保留独立 CDP 画面能力与截图后备。旧 `browser/preview/rtc.py` 的 Python 视频转码实现保留用于回归对照，当前 `BrowserSession` 实时入口使用 `NativeRTCStreams`。两条路径均不配置外部 STUN/TURN，面向本机环境。输入继续使用独立的 Playwright 控制连接。
 
 RTC 不可用时显示连接/降级状态，使用可用的 JPEG。美石建工当前 HTTP 入口不能被视为实时 30 帧/秒已经验收。实际帧率、延迟和 CPU 需要测量，不从传输技术推断；[路线比较](../history/2026-09-07-preview-route-comparison.md)区分独立样本与生产结果。旧截图每秒 8 帧设计值只存于[历史快照](../history/2026-09-07-jpeg-preview.md)。
 

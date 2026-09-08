@@ -9,9 +9,9 @@ from fastapi.testclient import TestClient
 import pytest
 from pydantic import ValidationError
 
-from mediacrawler.workbench.repository import Repository
+from mediacrawler.workbench.persistence.repository import Repository
 from mediacrawler.workbench.settings import BrowserSettings, SettingsRegistry
-from mediacrawler.workbench.settings_router import create_settings_router
+from mediacrawler.workbench.settings.router import create_settings_router
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def test_browser_defaults_do_not_create_persisted_configuration(tmp_path):
     repo = Repository(tmp_path)
     try:
         assert SettingsRegistry(repo).read_browser() == {
-            'auto_switch': True, 'snapshot_fps': 1, 'realtime_fps': 60, 'default_channel': 'chromium',
+            'auto_switch': True, 'snapshot_fps': 1, 'realtime_fps': 60, 'default_channel': 'chromium', 'reuse_login': True, 'navigation_timeout': 30,
         }
         assert repo.db.execute('SELECT count(*) FROM settings').fetchone()[0] == 0
     finally:
@@ -48,7 +48,7 @@ def test_partial_patch_preserves_other_fields_and_other_owners_after_restart(tmp
     repo.db.commit()
     settings.patch_browser({'auto_switch': False, 'realtime_fps': 30})
     value = settings.patch_browser({'snapshot_fps': 5})
-    assert value == {'auto_switch': False, 'snapshot_fps': 5, 'realtime_fps': 30, 'default_channel': 'chromium'}
+    assert value == {'auto_switch': False, 'snapshot_fps': 5, 'realtime_fps': 30, 'default_channel': 'chromium', 'reuse_login': True, 'navigation_timeout': 30}
     # Returned snapshots are detached from persisted state and class defaults.
     value['default_channel'] = 'msedge'
     assert settings.read_browser()['default_channel'] == 'chromium'
@@ -58,7 +58,7 @@ def test_partial_patch_preserves_other_fields_and_other_owners_after_restart(tmp
     repo.db.close()
     reopened = Repository(tmp_path)
     try:
-        assert SettingsRegistry(reopened).read_browser() == {'auto_switch': False, 'snapshot_fps': 5, 'realtime_fps': 30, 'default_channel': 'chromium'}
+        assert SettingsRegistry(reopened).read_browser() == {'auto_switch': False, 'snapshot_fps': 5, 'realtime_fps': 30, 'default_channel': 'chromium', 'reuse_login': True, 'navigation_timeout': 30}
         assert json.loads(reopened.db.execute("SELECT payload FROM settings WHERE section='future-owner'").fetchone()[0]) == {'untouched': True}
         assert BrowserSettings().snapshot_fps == 1
     finally:
@@ -70,7 +70,7 @@ def test_api_sections_describe_owners_without_moving_their_storage(settings_api)
     response = client.get('/api/settings/sections')
     assert response.status_code == 200
     sections = {section['id']: section for section in response.json()}
-    assert set(sections) == {'appearance', 'browser', 'platforms', 'data'}
+    assert set(sections) == {'appearance', 'browser', 'platforms', 'data', 'tasks', 'downloads', 'exports'}
     assert all(set(section) == {'id', 'title', 'summary', 'persistence'} for section in sections.values())
     assert sections['appearance']['persistence'] == 'localStorage'
     assert sections['platforms']['persistence'] == 'project_sqlite'
@@ -87,7 +87,7 @@ def test_browser_api_patch_merges_and_returns_complete_normalized_value(settings
     assert first.status_code == 200
     second = client.patch('/api/settings/browser', json={'snapshot_fps': 2})
     assert second.status_code == 200
-    expected = {'auto_switch': False, 'snapshot_fps': 2, 'realtime_fps': 10, 'default_channel': 'chromium'}
+    expected = {'auto_switch': False, 'snapshot_fps': 2, 'realtime_fps': 10, 'default_channel': 'chromium', 'reuse_login': True, 'navigation_timeout': 30}
     assert second.json() == expected
     assert client.get('/api/settings/browser').json() == expected
     assert client.patch('/api/settings/browser', json={}).json() == expected
@@ -126,7 +126,7 @@ def test_owner_validates_direct_calls_without_relying_on_http(tmp_path):
         repo.db.close()
 
 
-def test_v2_migration_backs_up_wal_data_before_v3_and_preserves_platforms(tmp_path):
+def test_v2_migration_backs_up_wal_data_before_v4_and_preserves_platforms(tmp_path):
     path = tmp_path / 'index.sqlite3'
     with sqlite3.connect(path) as old:
         old.executescript('''
@@ -141,13 +141,13 @@ def test_v2_migration_backs_up_wal_data_before_v3_and_preserves_platforms(tmp_pa
         # Keep the old connection open, so backup must include committed WAL data.
         repo = Repository(tmp_path)
         try:
-            assert repo.db.execute('PRAGMA user_version').fetchone()[0] == 3
+            assert repo.db.execute('PRAGMA user_version').fetchone()[0] == 4
             assert repo.task('a' * 32)['state'] == 'succeeded'
             assert json.loads(repo.db.execute('SELECT payload FROM platforms').fetchone()[0])['owner'] == 'platform-registry'
             SettingsRegistry(repo).patch_browser({'default_channel': 'msedge'})
         finally:
             repo.db.close()
-    backups = list((tmp_path / 'backups').glob('index-before-v3-*.sqlite3'))
+    backups = list((tmp_path / 'backups').glob('index-before-v4-*.sqlite3'))
     assert len(backups) == 1
     with sqlite3.connect(backups[0]) as backup:
         assert backup.execute('PRAGMA user_version').fetchone()[0] == 2
@@ -165,9 +165,9 @@ def test_v2_migration_backs_up_wal_data_before_v3_and_preserves_platforms(tmp_pa
 def test_future_schema_is_not_silently_downgraded(tmp_path):
     path = tmp_path / 'index.sqlite3'
     with sqlite3.connect(path) as future:
-        future.execute('PRAGMA user_version=4')
+        future.execute('PRAGMA user_version=5')
     with pytest.raises(RuntimeError, match='版本'):
         Repository(tmp_path)
     with sqlite3.connect(path) as untouched:
-        assert untouched.execute('PRAGMA user_version').fetchone()[0] == 4
+        assert untouched.execute('PRAGMA user_version').fetchone()[0] == 5
         assert untouched.execute("SELECT count(*) FROM sqlite_master WHERE name='settings'").fetchone()[0] == 0

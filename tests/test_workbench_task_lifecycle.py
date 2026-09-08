@@ -4,9 +4,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from mediacrawler.workbench.media.capture import MediaCapture
-from mediacrawler.workbench.models import SessionConfig, TaskConfig
-from mediacrawler.workbench.service import Workbench
+from mediacrawler.workbench.browser.capture import MediaCapture
+from mediacrawler.workbench.workflows.legacy_models import SessionConfig, TaskConfig
+from mediacrawler.workbench.workflows.service import Workbench
 
 
 @pytest.mark.asyncio

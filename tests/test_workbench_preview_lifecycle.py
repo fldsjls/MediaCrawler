@@ -6,9 +6,9 @@ from types import SimpleNamespace
 import pytest
 from PIL import Image
 
-from mediacrawler.workbench.preview.frames import Frame, FrameHub, Subscription
-from mediacrawler.workbench.preview.rtc import BrowserVideoTrack, RTCStreams
-from mediacrawler.workbench.preview import rtc
+from mediacrawler.workbench.browser.preview.frames import Frame, FrameHub, Subscription
+from mediacrawler.workbench.browser.preview.rtc import BrowserVideoTrack, RTCStreams
+from mediacrawler.workbench.browser.preview import rtc
 
 
 def jpeg(color):

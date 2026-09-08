@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from mediacrawler.workbench.models import TaskConfig, TERMINAL
-from mediacrawler.workbench.service import Workbench, WORKER, resource_identity
+from mediacrawler.workbench.workflows.legacy_models import TaskConfig, TERMINAL
+from mediacrawler.workbench.workflows.service import Workbench, WORKER, resource_identity
 
 
 @contextlib.contextmanager
@@ -69,7 +69,7 @@ async def until(workbench, task_id, states=TERMINAL, timeout=75):
 @pytest.mark.asyncio
 async def test_custom_video_template_uses_owned_preview_and_shared_queue(tmp_path):
     from mediacrawler.workbench.platforms.registry import PlatformDefinition
-    from mediacrawler.workbench.models import SessionConfig
+    from mediacrawler.workbench.workflows.legacy_models import SessionConfig
     media = tmp_path / 'media'
     media.mkdir()
     workbench = Workbench(tmp_path / 'workbench')

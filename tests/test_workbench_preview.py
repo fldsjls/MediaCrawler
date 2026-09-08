@@ -8,8 +8,8 @@ from aiortc import RTCConfiguration, RTCPeerConnection, RTCSessionDescription
 from PIL import Image
 
 from mediacrawler.workbench.browser import BrowserSession
-from mediacrawler.workbench.models import SessionConfig
-from mediacrawler.workbench.preview.frames import FrameHub
+from mediacrawler.workbench.workflows.legacy_models import SessionConfig
+from mediacrawler.workbench.browser.preview.frames import FrameHub
 from tests.test_workbench_api import local_api
 
 
@@ -128,7 +128,7 @@ def test_preview_signalling_requires_matching_session_identity(local_api, tmp_pa
 
 @pytest.mark.asyncio
 async def test_fastest_subscriber_does_not_drop_frames_when_timer_wakes_early(monkeypatch):
-    from mediacrawler.workbench.preview import frames as frame_module
+    from mediacrawler.workbench.browser.preview import frames as frame_module
 
     clock = [100.0]
     monkeypatch.setattr(frame_module, 'time', SimpleNamespace(monotonic=lambda: clock[0]))

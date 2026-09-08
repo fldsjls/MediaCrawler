@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from mediacrawler.workbench.runtime import Runtime
+from mediacrawler.workbench.workflows.runtime import Runtime
 
 
 def events(runtime):

@@ -11,21 +11,21 @@
 | 平台定义和类型 | `platforms/catalog.py` | 内置网站、类型、模板和声明的能力 | 浏览器操作、任务状态、页面布局 |
 | 自定义平台 | `platforms/registry.py` | 配置校验、注册、禁用和能力描述 | 执行用户脚本、推断未实现的采集能力 |
 | 扩展契约 | `platforms/contracts.py` | 适配接口、商品及价格观察的数据契约 | 价格抓取、价格比较执行器或页面 |
-| 请求模型 | `models.py` | 任务、会话、控制字段和兼容校验 | SQL、文件下载、浏览器控制 |
-| 任务用例与状态 | `service.py` | 排队、控制、worker 生命周期、资源入队、结果汇总 | 平台响应字段解析、平台特有登录规则 |
-| 数据持久化 | `repository.py` | SQLite 任务、事件、内容、文件索引及任务目录定位 | 界面文案、平台采集判断 |
+| 请求模型 | `workflows/legacy_models.py` | 任务、会话、控制字段和兼容校验 | SQL、文件下载、浏览器控制 |
+| 任务用例与状态 | `workflows/service.py` | 排队、控制、worker 生命周期、资源入队、结果汇总 | 平台响应字段解析、平台特有登录规则 |
+| 数据持久化 | `persistence/repository.py` | SQLite 任务、事件、内容、文件索引及任务目录定位 | 界面文案、平台采集判断 |
 | HTTP / WebSocket | `router.py` | 请求和响应边界、会话身份、公开字段裁剪 | 复制状态机、直接运行爬虫逻辑 |
-| 浏览器会话 | `browser.py` | Chromium 所有权、页面列表、预览、输入、进程清理 | 判断视频属于哪条平台内容、采集价格规则 |
-| 实时画面传输 | `preview/native.py`、`preview/native_sender.js` | 原生标签页捕获、CaptureHandle 身份、RTC 信令及释放 | 接管许可、平台内容规则、任务或下载凭据 |
-| 捕获视口 | `preview/viewport.py` | 实测物理内容区、所属窗口尺寸与输入坐标对齐 | 任意系统窗口控制、拉伸错误画面、平台布局规则 |
-| 低刷新画面与内部页 | `preview/frames.py`、`preview/cdp.py`、`preview/internal.py` | 单生产者最新 JPEG、截图后备、内部页统一识别 | 平台资源归属、创建第二采集浏览器 |
-| 项目设置 | `settings.py`、`settings_router.py` | 浏览器默认值、枚举校验、SQLite 合并保存 | 页面层级、运行任务或已有会话状态 |
-| 操作屏障与事件 | `runtime.py` | worker 暂停、恢复校验、结构化事件 | 从日志猜测任务状态、持久化业务对象 |
-| 平台采集 | `platform_worker.py`、`src/mediacrawler/platforms/*`、`src/mediacrawler/storage/stores/*` | 原生登录、发现、读取、分页约束、原存储与脱敏 | 直接写公共任务表、另建公共下载队列 |
-| 平台媒体解析 | `adapters/media.py`、`adapters/media_worker.py` | 当前内容的资源归属、清晰度选择、原始字段临时上下文 | 根据任意同页请求自动关联广告或其他帖子 |
-| 声明式网页采集 | `template_worker.py` | 现有会话中的网页视频 DOM 解析 | 任意 Python / JavaScript 执行 |
+| 浏览器会话 | `browser/__init__.py` | Chromium 所有权、页面列表、预览、输入、进程清理 | 判断视频属于哪条平台内容、采集价格规则 |
+| 实时画面传输 | `browser/preview/native.py`、`browser/preview/native_sender.js` | 原生标签页捕获、CaptureHandle 身份、RTC 信令及释放 | 接管许可、平台内容规则、任务或下载凭据 |
+| 捕获视口 | `browser/preview/viewport.py` | 实测物理内容区、所属窗口尺寸与输入坐标对齐 | 任意系统窗口控制、拉伸错误画面、平台布局规则 |
+| 低刷新画面与内部页 | `browser/preview/frames.py`、`browser/preview/cdp.py`、`browser/preview/internal.py` | 单生产者最新 JPEG、截图后备、内部页统一识别 | 平台资源归属、创建第二采集浏览器 |
+| 项目设置 | `settings/__init__.py`、`settings/router.py` | 浏览器默认值、枚举校验、SQLite 合并保存 | 页面层级、运行任务或已有会话状态 |
+| 操作屏障与事件 | `workflows/runtime.py` | worker 暂停、恢复校验、结构化事件 | 从日志猜测任务状态、持久化业务对象 |
+| 平台采集 | `platforms/worker.py`、`src/mediacrawler/platforms/*`、`src/mediacrawler/storage/stores/*` | 原生登录、发现、读取、分页约束、原存储与脱敏 | 直接写公共任务表、另建公共下载队列 |
+| 平台媒体解析 | `platforms/adapters/media.py`、`platforms/adapters/media_worker.py` | 当前内容的资源归属、清晰度选择、原始字段临时上下文 | 根据任意同页请求自动关联广告或其他帖子 |
+| 声明式网页采集 | `platforms/template_worker.py` | 现有会话中的网页视频 DOM 解析 | 任意 Python / JavaScript 执行 |
 | 课程内部执行模块 | `src/browser-worker/src/workbench` | 迁入课程发现与播放捕获、结构化协议 | 独立 Node Web 服务、接管公共索引 |
-| 媒体机制 | `media/capture.py`、`media/identity.py`、`media/downloader.py` | 被动发现、稳定身份、媒体传输及合并机制 | 把网络候选当作已确认内容、绕过任务入队 |
+| 媒体机制 | `browser/capture.py`、`downloads/identity.py`、`downloads/downloader.py` | 被动发现、稳定身份、媒体传输及合并机制 | 把网络候选当作已确认内容、绕过任务入队 |
 | 页面与交互 | `src/webui/src/workbench` | 配置、平台管理、工作区、预览、结果和操作反馈 | 连接 CDP、访问 SQLite、判定任务最终状态 |
 
 ## 四种 owner
@@ -63,3 +63,14 @@ worker → 平台适配器 / 声明式模板 → Runtime 结构化事件 → ser
 - 为统一目录外观搬动上游 CLI、覆盖既有数据/Profile，或恢复旧 Node Web 服务为运行依赖。
 
 部署和操作见[工作台指南](/getting-started/local-setup.md)，新增代码的具体约定见[开发与扩展](/development/extensions.md)。
+
+
+## 方案与运行契约
+
+`workflows/models.py` 定义 TaskDefinition、WorkflowPlan、StepSpec、WorkflowRun、StepRun 和 Artifact。`rules.py` 是唯一编排规则来源，返回可添加卡片、各卡片合法输入及具体错误；前端不复制能力判定。`engine.py` 将方案步骤接入原 Workbench 队列与控制服务。
+
+API：`GET /api/task-types`、`POST /api/plans/validate`、`GET/POST /api/plans`、`PUT /api/plans/{id}`、`GET/POST /api/runs`、`GET /api/runs/{id}` 和 `/api/runs/{id}/artifacts`。产物的 `file`、`preview` 子路由通过产物 ID 访问。运行控制提供 `/api/runs/{id}/control`，兼容 `/api/tasks/{id}/control`，沿用同一状态服务。提交支持 Idempotency-Key，重复请求返回原运行。
+
+SQLite v4 增量增加方案与步骤表，旧任务由兼容视图映射为单步骤。迁移前使用 SQLite backup，原始文件不搬迁。新运行快照与关联重试复用现有任务表，未另建状态机或 Node 下载队列。
+
+完整发现步骤连到单个下载步骤时可流水处理。每个资源和产物记录来源步骤；失败必要前置阻止后续依赖，其他步骤仍执行。成功产物由关联尝试引用，不删除原始失败。

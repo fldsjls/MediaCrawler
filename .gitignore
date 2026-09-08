@@ -14,6 +14,8 @@ build/
 develop-eggs/
 dist/
 downloads/
+!src/mediacrawler/workbench/downloads/
+!src/mediacrawler/workbench/downloads/*.py
 eggs/
 .eggs/
 /lib/

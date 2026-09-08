@@ -5,10 +5,10 @@ from types import SimpleNamespace
 
 import pytest
 
-from mediacrawler.workbench.adapters.media import parse_media
-from mediacrawler.workbench.adapters.media_worker import MediaCoordinator
-from mediacrawler.workbench.media import downloader
-from mediacrawler.workbench.runtime import Runtime
+from mediacrawler.workbench.platforms.adapters.media import parse_media
+from mediacrawler.workbench.platforms.adapters.media_worker import MediaCoordinator
+from mediacrawler.workbench.downloads import downloader
+from mediacrawler.workbench.workflows.runtime import Runtime
 
 
 @pytest.mark.parametrize('platform', ['zhihu', 'tieba'])

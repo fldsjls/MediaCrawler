@@ -1,7 +1,7 @@
 # 数据与浏览器 Profile 导入
 
 > 文档类型：运维操作
-> 代码依据：`migration.py` 与设置页面。
+> 代码依据：`persistence/migration.py` 与设置页面。
 
 ## 显式迁移
 

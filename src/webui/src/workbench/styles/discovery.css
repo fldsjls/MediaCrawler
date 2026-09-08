@@ -1,0 +1,19 @@
+/* Discovery controls follow the panel width, independently of configuration forms. */
+.wb-discovery { overflow:auto; }
+.wb-discovery-toolbar { display:grid; grid-template-columns:120px minmax(0,1fr) auto; align-items:center; gap:8px; padding:12px; flex-shrink:0; }
+.wb-discovery-toolbar > select,.wb-discovery-toolbar > button { min-height:38px; }
+.wb-shell .wb-discovery-toolbar label.wb-search { min-width:0; height:38px; }
+.wb-discovery-toolbar .wb-search svg { flex-shrink:0; }
+.wb-discovery-selection { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; padding:0 12px 12px; border-bottom:1px solid var(--wb-border); flex-shrink:0; }
+.wb-shell .wb-discovery-selection label.wb-check { margin:0; min-height:24px; white-space:nowrap; }
+.wb-discovery-status { flex:1; min-width:120px; color:var(--wb-muted); font-size:12px; overflow-wrap:anywhere; }
+.wb-discovery > .wb-table-empty { min-height:120px; }
+.wb-discovery > .wb-resource-layout { flex-shrink:0; min-height:140px; }
+@container (max-width:440px) {
+  .wb-discovery-toolbar { grid-template-columns:104px minmax(0,1fr); }
+  .wb-discovery-toolbar > button { grid-column:1/-1; }
+}
+@media (max-width:760px) {
+  .wb-discovery-toolbar > select,.wb-discovery-toolbar > button,.wb-shell .wb-discovery-toolbar label.wb-search { min-height:44px; }
+  .wb-shell .wb-discovery-selection label.wb-check { min-height:44px; }
+}

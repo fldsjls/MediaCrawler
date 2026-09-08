@@ -2,8 +2,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from mediacrawler.workbench.models import TaskConfig
-from mediacrawler.workbench.service import TaskRun, Workbench
+from mediacrawler.workbench.workflows.legacy_models import TaskConfig
+from mediacrawler.workbench.workflows.service import TaskRun, Workbench
 
 
 @pytest.mark.asyncio
@@ -33,7 +33,7 @@ async def test_requested_media_without_resources_is_not_reported_as_complete(tmp
 
 @pytest.mark.asyncio
 async def test_expiring_resource_gets_one_refresh_without_redownloading_success(tmp_path):
-    from mediacrawler.workbench.media.capture import MediaCapture
+    from mediacrawler.workbench.browser.capture import MediaCapture
     workbench = Workbench(tmp_path)
     config = TaskConfig(platform='bili', target='BV-fixture', download_video=True, max_downloads=2)
     task_id = workbench.repo.create(config.model_dump())

@@ -5,8 +5,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from mediacrawler.workbench.platform_worker import install_pagination_limits
-from mediacrawler.workbench.runtime import Runtime
+from mediacrawler.workbench.platforms.worker import install_pagination_limits
+from mediacrawler.workbench.workflows.runtime import Runtime
 
 
 def runtime():
@@ -210,7 +210,7 @@ async def test_weibo_without_abstract_base_still_pauses_and_refreshes_cookies():
     import types
     from mediacrawler.common.base.base_crawler import AbstractApiClient
     from mediacrawler.platforms.weibo.client import WeiboClient
-    from mediacrawler.workbench.platform_worker import install_request_barrier, refresh_adapter_login
+    from mediacrawler.workbench.platforms.worker import install_request_barrier, refresh_adapter_login
     calls = []
     class Fixture(WeiboClient):
         __module__ = 'fixture.weibo'

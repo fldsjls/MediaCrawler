@@ -14,10 +14,10 @@ from types import SimpleNamespace
 import pytest
 
 from mediacrawler.workbench.browser import BrowserSession, BrowserSessions
-from mediacrawler.workbench.media.capture import MediaCapture, classify, manifest_status
-from mediacrawler.workbench.media.downloader import MediaProxy, download
-from mediacrawler.workbench.media.identity import resource_identity
-from mediacrawler.workbench.models import SessionConfig
+from mediacrawler.workbench.browser.capture import MediaCapture, classify, manifest_status
+from mediacrawler.workbench.downloads.downloader import MediaProxy, download
+from mediacrawler.workbench.downloads.identity import resource_identity
+from mediacrawler.workbench.workflows.legacy_models import SessionConfig
 
 TOOLS = Path(__file__).resolve().parents[1] / '.local/tools'
 

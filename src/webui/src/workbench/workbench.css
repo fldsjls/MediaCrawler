@@ -2,3 +2,7 @@
 @import './styles/theme.css';
 @import './styles/tables.css';
 @import './styles/task-drawer.css';
+
+@import './styles/workflows.css';
+@import './styles/discovery.css';
+@import './styles/settings.css';

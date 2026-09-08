@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from mediacrawler.api.schemas import LogEntry
-from .models import TaskConfig, TERMINAL
+from mediacrawler.workbench.workflows.legacy_models import TaskConfig, TERMINAL
 
 class LegacyTaskFacade:
     def __init__(self):

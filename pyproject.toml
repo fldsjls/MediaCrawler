@@ -57,7 +57,7 @@ where = ["src"]
 include = ["mediacrawler*"]
 
 [tool.setuptools.package-data]
-mediacrawler = ["resources/js/*.js", "workbench/preview/*.js"]
+mediacrawler = ["resources/js/*.js", "workbench/browser/preview/*.js"]
 
 [project.scripts]
 mediacrawler = "mediacrawler.cli.main:entrypoint"

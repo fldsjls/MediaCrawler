@@ -1,6 +1,6 @@
 # 设置中心职责
 
-> 文档类型：当前设置架构；依据 `settings.py`、`settings_router.py`、`repository.py` 和 `SettingsCenter.tsx`。
+> 文档类型：当前设置架构；依据 `settings/__init__.py`、`settings/router.py`、`persistence/repository.py` 和 `SettingsCenter.tsx`。
 
 分类入口、子项列表、详情分别负责定位类别、选择设置和编辑内容。详情必须说明默认值、允许值、保存位置、作用域和生效时机，不能把所有表单无边界平铺。
 
@@ -16,6 +16,11 @@
 
 `SettingsRegistry` 拥有浏览器默认值，使用 SQLite `settings(section,payload,updated)`。PATCH 只合并显式字段，严格校验类型与枚举，不允许空值替代默认值。新会话读取并保存快照，不修改现有会话。设置 router 通过 Repository provider 获取数据，不反向导入 service。外观由 localStorage 管理，平台继续归 PlatformRegistry。
 
-当前索引使用 SQLite `user_version=3`。已有索引升级前通过 SQLite 备份 API 保存一致性副本，包含 WAL 中的数据；这份升级备份不替代用户的定期任务文件备份。
+当前索引使用 SQLite `user_version=4`。已有索引升级前通过 SQLite 备份 API 保存一致性副本，包含 WAL 中的数据；这份升级备份不替代用户的定期任务文件备份。
 
 见[操作指南](../guides/settings.md)与 [ADR 0003](../adr/0003-settings-navigation.md)。
+
+
+任务与下载默认值由 `settings/defaults.py` 管理，保存在 `task_defaults` 分区。平台模板中的匹配字段覆盖项目默认，卡片只存显式字段；排队前解析为 `step_settings` 快照。工具检查通过公共下载模块，路径来自现有工具根目录，不另建工具安装清单。
+
+文件传输与导出使用产物索引定位。外部另存位置只由已登记产物访问，API 不接收任意文件路径。设置字段和生效时间见[设置指南](../guides/settings.md)。

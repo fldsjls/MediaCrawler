@@ -6,34 +6,26 @@
 
 ```text
 src/mediacrawler/workbench/
-  platforms/         catalog、registry、contracts：类型、定义、注册和扩展契约
-  adapters/          平台专属媒体解析与原存储接入
-  media/             capture、identity、downloader：候选、身份和传输
-  preview/           native 原生捕获信令、native_sender 浏览器 RTC、internal 辅助页边界
-                     viewport 物理内容区对齐、frames 单生产者低刷 JPEG、cdp 画面通道
-                     rtc 保留旧转码回归
-  settings.py        浏览器默认值、严格校验与 SQLite 保存
-  settings_router.py 设置入口，使用 Repository provider
-  router.py          对外 HTTP / WebSocket
-  service.py         任务和下载调度
-  repository.py      SQLite 与任务目录
-  models.py          请求、状态和兼容模型
-  browser.py         会话、页面、画面与输入
-  runtime.py         worker 操作屏障与事件
-  platform_worker.py 原生平台执行入口
-  template_worker.py 声明式网站模板执行入口
-  migration.py       显式数据/Profile 导入
-  compat.py          原 API 兼容桥
-src/webui/src/workbench/ React 页面、配置、平台管理、工作区和结果
-  SettingsCenter.tsx 分类、子项、详情与设置动作
-  useBrowserPresentation.ts RTC / JPEG 切换、清理与降级
-src/mediacrawler/platforms/      上游平台发现、登录、详情与评论
-store/               上游内容字段、脱敏与存储
-src/browser-worker/
-  src/workbench/     内部 Node 入口与协议
-  src/sites/         迁入课程及历史网页采集
-scripts/             统一安装、启动、环境和工具校验
-tests/               本地样本、协议、真实本地浏览器和流程测试
+  workflows/     models、rules、engine、service、runtime：契约、规则与统一调度
+  settings/      默认值、继承解析与工具设置接口
+  browser/       会话、capture 资源监听、preview 画面和输入
+  downloads/     HTTP、FFmpeg、N_m3u8DL-RE 和 URL 范围传输
+  results/       产物索引、导出和分页预览
+  persistence/   repository SQLite 与 migration 显式资料导入
+  platforms/     catalog、registry、contracts、适配器与 worker
+  router.py      HTTP / WebSocket 边界组合
+  compat.py      旧 API 接入同一服务
+src/webui/src/workbench/
+  workflows/     方案、窄栏卡片和弹窗
+  runs/          运行中心和详情抽屉
+  browser/       网站预览及画面生命周期
+  results/       发现资源与共用产物预览
+  settings/      分类和详细默认值
+  shared/        弹窗、焦点与溢出提示
+src/mediacrawler/platforms/ 上游平台采集实现
+src/mediacrawler/storage/stores/ 上游存储
+src/browser-worker/        课程和通用网页执行器，沿用原入口
+scripts/                   安装、启动、构建、校验及维护
 ```
 
 ## 新增网站还是新增适配器
@@ -76,11 +68,11 @@ worker 通过 JSON 行发送 `record`、`resource`、`phase`、`state`、`failur
 
 `kind` 区分视频和图片；分段用 `role: "segment"`，多个清晰度只选择当前可取得的最高一档。稳定 key 表示逻辑资源，不能直接使用会变化的签名 URL。适配器请求头只传允许的 Referer / User-Agent，不把 Cookie 或授权字段写入公开事件。
 
-同页网络请求只是候选证据，不能据此绑定最后一条内容。浏览器后备只读取明确当前内容容器内的 video 或播放控件；模糊归属交由会话捕获列表手选。传输和清单解析进入 media 模块，平台语义留在 adapters。
+同页网络请求只是候选证据，不能据此绑定最后一条内容。浏览器后备只读取明确当前内容容器内的 video 或播放控件；模糊归属交由会话捕获列表手选。传输和清单解析进入 downloads，平台语义留在 platforms/adapters。
 
 ## React 与公共布局
 
-`Workbench` 组合页面和服务数据；`ConfigurationPanel`、`PlatformManager` 解释平台能力和保存动作；`Workspace` 只处理标签、平铺、比例与最大化；`BrowserPanel` 处理会话展示和用户操作；`ResultsPanel` 展示结果与选择。
+`Workbench` 组合页面和服务数据；`WorkflowPanel` 使用后端方案校验与可用卡片，`PlatformManager` 负责平台保存动作；`Workspace` 只处理标签、平铺、比例与最大化；`BrowserPanel` 处理会话展示和用户操作；`DiscoveryPanel` 与 `Artifacts` 分别展示发现资源和运行产物。
 
 主题、间距、边框、折叠、焦点和 ARIA 属于展示机制。共享组件接受明确字段和回调，不按平台名称猜测能力，不直接操作数据库或启动下载。成功反馈不挤压工作区；需要处理的错误使用可关闭且能恢复焦点的对话框。
 
@@ -97,3 +89,5 @@ npm run docs:build
 ```
 
 根据改动选择有意义的流程回归；文档构建通过只证明站点可构建和链接可解析，不证明 API、真实网站或界面已经验收。验收边界见[验证文档](/history/2026-09-07-platform-media-validation.md)。
+
+新增步骤先在 workflows 声明输入、输出、覆盖字段和执行器，再由 rules 开放；没有执行器不开放卡片。所有新增参数必须在设置中定义默认值与生效范围，不能只做可点击但未接入执行器的控件。

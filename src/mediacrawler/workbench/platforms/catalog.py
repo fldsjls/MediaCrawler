@@ -17,7 +17,7 @@ TEMPLATES = [
 PLATFORMS = []
 for key, name, url, modes, comments, images, category, tags, engine in [
     ('meishiwang', '美石建工', 'http://edu.meishiwang100.com', ['detail'], False, False, 'video', ['课程'], 'course'),
-    ('generic', '历史网页捕获', '', ['detail'], False, False, 'other', [], 'video_capture'),
+    ('generic', '通用网页', '', ['detail'], False, False, 'other', [], 'video_capture'),
     ('bili', 'Bilibili', 'https://www.bilibili.com', ['detail', 'search', 'creator'], True, False, 'video', [], 'platform'),
     ('xhs', '小红书', 'https://www.xiaohongshu.com', ['search', 'detail', 'creator'], True, True, 'community', ['图文', '视频'], 'platform'),
     ('dy', '抖音', 'https://www.douyin.com', ['search', 'detail', 'creator'], True, True, 'video', [], 'platform'),
@@ -29,7 +29,7 @@ for key, name, url, modes, comments, images, category, tags, engine in [
     PLATFORMS.append(dict(id=key, name=name, url=url, inputs=modes, comments=comments,
         images=images, video=True, media=True, media_modes=modes, video_modes=modes,
         outputs=['jsonl', 'json', 'csv', 'excel'], category=category, tags=tags,
-        builtin=True, enabled=key != 'generic', legacy=key == 'generic', collect=True,
+        builtin=True, enabled=True, legacy=False, collect=True,
         template=engine, template_config={}, video_strategy='adapter_and_capture' if engine != 'video_capture' else 'capture',
         verification='requires_live_validation'))
 
